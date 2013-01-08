@@ -683,11 +683,220 @@ We also need to set several files and directories with the proper SELinux contex
 	# restorecon -rv /var/run
 	# restorecon -rv /usr/share/rubygems/gems/passenger-*
 
+##**Understanding and changing the Broker configuration**
+
+The OpenShift Enterprise Broker uses a configuration file to define several of the attributes for controlling how the platform as a service works.  This configuration file is located at */etc/openshift/broker.conf*.  For instance, the valid gear types that a user can create are defined using the *VALID_GEAR_SIZES* variable.
+
+	# Comma seperted list of valid gear sizes
+	VALID_GEAR_SIZES="small,medium"
+	
+Edit this file and ensure that the *CLOUD_DOMAIN* variable is set to correctly reflect the domain that you are using to configure this deployment of OpenShift Enterprise.
+
+	# Domain suffix to use for applications (Must match node config)
+	CLOUD_DOMAIN="example.com"
+	
+While you are in this file, you can change any other settings that need to be configured for your specific installation.
 
 **Lab 7 Complete!**
 
 <!--BREAK-->
+
+#**Lab 8: Configuring the Broker plugins and MongoDB User Accounts (Estimated time: xx minutes)**
+
+**Server Used:**
+
+Broker host
+
+**Tools used**
+
+* text editor
+* cat
+* echo
+* envirionment variables
+* pushd
+* semodule
+* htpasswd
+* mongo
+* bundler
+* chkconfig
+* service
+	
+OpenShift Enterprise uses a plugin system for core system components such as DNS, authentication, and messenging.  In order to make use of these plugins, we need to configure them and provide the correct configuration items to ensure that they work correclty.  The plugin configuration files are located in the */etc/openshift/plugins.d* directory.  We will be working with several of these files so it is suggested that you change to that directory to complete the steps in this lab.
+
+	# cd /etc/openshift/plugins.d
+	
+Once you are in this directory, you will see that OpenShift Enterprise provides several example configuration files for you to use to speed up the process of configuring these plugins.  You should see three example files.
+
+* openshift-origin-auth-remote-user.conf.example
+* openshift-origin-dns-bind.conf.example
+* openshift-origin-msg-broker-mcollective.conf.example
+
+##**Create conf files from examples**
+
+Let’s begin by copying the .example files to actual configuration files that will be used by OpenShift Enterprise.
+
+	# cp openshift-origin-auth-remote-user.conf.example openshift-origin-auth-remote-user.conf
+	# cp openshift-origin-msg-broker-mcollective.conf.example openshift-origin-msg-broker-mcollective.conf
+
+##**Configure the DNS plugin**
+
+Instead of copying the example DNS configuration file, we are going to create a new one by issueing an echo command.  We are doing this to take advantage of the $domain and $keyfile environment variables that we created in a previous lab.  If you are no longer have these variables set, you can recreate them with the following commands:
+
+	# domain=example.com
+	# keyfile=/var/named/${domain}.key
+	# cd /var/named
+	# KEY="$(grep Key: K${domain}*.private | cut -d ' ' -f 2)"
+	
+To verify that your variables were recreated correctly, echo the contents of your keyfile and verify your $KEY variable is set correctly:
+
+	# cat $keyfile
+	# echo $KEY
+	
+If you perfomed the above steps correctly, you should see output similiar to this:
+
+	key example.com {
+  		algorithm HMAC-MD5;
+  		secret "3RH8tLp6fvX4RVV9ny2lm0tZpTjXhB62ieC6CN1Fh/2468Z1+6lX4wpCJ6sfYH6u2+//gbDDStDX+aPMtSiNFw==";
+	};
+	
+Now that we have our variables setup correctly, we can create our *openshift-origin-dns-bind.conf* file.  Ensure that you are still in the */etc/openshift/plugins.d* directory and issue the following command:
+
+	# cat << EOF > openshift-origin-dns-bind.conf
+	BIND_SERVER="127.0.0.1"
+	BIND_PORT=53
+	BIND_KEYNAME="${domain}"
+	BIND_KEYVALUE="${KEY}"
+	BIND_ZONE="${domain}"
+	EOF
+	
+After running this command, cat the contents of the file and ensure they look similiar to the following:
+
+	BIND_SERVER="127.0.0.1"
+	BIND_PORT=53
+	BIND_KEYNAME="example.com"
+	BIND_KEYVALUE="3RH8tLp6fvX4RVV9ny2lm0tZpTjXhB62ieC6CN1Fh/2468Z1+6lX4wpCJ6sfYH6u2+//gbDDStDX+aPMtSiNFw=="
+	BIND_ZONE="example.com"
+	
+The last step to configure DNS is to compile and install the SELinux policy for the plugin.
+
+	# pushd /usr/share/selinux/packages/rubygem-openshift-origin-dns-bind/ && make -f /usr/share/selinux/devel/Makefile ; popd
+	# semodule -i /usr/share/selinux/packages/rubygem-openshift-origin-dns-bind/dhcpnamedforward.pp
+
+##**Configure Authentication**
+
+OpenShift Enterprise supports various different authentication systems for authorizing a user.  In a production environment, you will probably want to use LDAP, kerberos, or some other enteprise class authorization and authenication system.  However, for this lab we will use a system called Basic Auth which relies on a *htpasswd* file to configure authentication.  OpenShift Enterprise provides three example authentication configuration files in the */var/www/openshift/broker/httpd/conf.d/* directory.
+
+ Authentication Type | Description|
+| :---------------  | :------------ |
+| Basic Auth | openshift-origin-auth-remote-user-basic.conf.sample | 
+| Kerberos | openshift-origin-auth-remote-user-kerberos.conf.sample | 
+| LDAP | openshift-origin-auth-remote-user-ldap.conf.sample | 
+[Authentication Sample Files][section-mmd-tables-table1] 
+
+Since we will be using Basic Auth, we need to copy the sample configuration file to the actual configuration file:
+
+	# cp /var/www/openshift/broker/httpd/conf.d/openshift-origin-auth-remote-user-basic.conf.sample /var/www/openshift/broker/httpd/conf.d/openshift-origin-auth-remote-user.conf 
+	
+This configuration file specifies that the *AuthUserFile* is located at */etc/openshift/htpasswd*.  At this point, that file doesn’t exist, so we need to create it and add a user named *demo*.
+
+	# htpasswd -c /etc/openshift/htpasswd demo
+	
+After entering the above command, you will be prompted for a password for the user *demo*.  Once you have provided that password, view the contents of the htpasswd file to ensure that the user was added correctly.  Make a note of the password as we will using it during later labs.
+
+	# cat /etc/openshift/htpasswd
+
+If the operation was a success, you should see output similar to the following:
+
+	demo:$apr1$Q7yO3MF7$rmSZ7SI.vITfEiLtkKSMZ/
+
+##**Add MongoDB account**
+
+As previously discussed in this training class, OpenShift Enterprise makes heavy use of the MongoDB NOSQL database.  In a previous lab, we installed and configured MongoDB but now we need to add a user for the broker application.  If you take a look at the broker configuration file
+
+	# cat /etc/openshift/broker.conf |grep MONGO
+	
+you will see that by default, the broker application is expecting a mongodb user to be created called *openshift* with a password of *mooo*.  At this point, you can either create a user with those credentials or create a seperate user.  If you create a seperate user, ensure that you modify the broker.conf file to reflect the correct credentials.
+
+	# mongo openshift_broker_dev --eval 'db.addUser("openshift", “mooo”)’
+	
+Once you have entered the above command, you should see the following output:
+
+	MongoDB shell version: 2.0.2
+	connecting to: openshift_broker_dev
+	{ "n" : 0, "connectionId" : 2, "err" : null, "ok" : 1 }
+	{
+		"user" : "openshift",
+		"readOnly" : false,
+		"pwd" : "8f5b96dbda3a3cd0120d6de44d8811a7",
+		"_id" : ObjectId("50e4665e60ce1894d530e1f1")
+	}
+	
+##**Configure Bundler**
+
+The broker rails application depends on several gem files in order to operate correctly.  We need to ensure that bundler can find the appropriate gem files.
+
+	# cd /var/www/openshift/broker
+	# bundle --local
+	
+You should see a lot of information scroll by letting you know what gem files the system is actually using.  The last line of output should be:
+	
+	Your bundle is complete! Use `bundle show [gemname]` to see where a bundled gem is installed.
+
+##**Setting services to start**
+
+The last step in configuring our broker application is to ensure that all of our services are started and that they are configured to start upon system boot.
+
+	# chkconfig openshift-broker on
+	
+This will ensure that the broker starts upon next system boot.  However, we also need to start the broker application to run now.
+
+	# service httpd start
+	# service openshift-broker start
+
+
+**Lab 8 Complete!**
 <!--BREAK-->
+#**Lab 9: Installing the OpenShift Enterprise Web Console (Estimated time: xx minutes)**
+
+**Server Used:**
+
+Broker host
+
+**Tools used**
+
+* text editor
+* yum
+* service
+* chkconfig
+
+In this lab we want to install the OpenShift Enterprise Web Console.  The console is written in ruby and will provide a great way for users of the system to create and manage application gears that are deployed on the gear nodes.  
+
+##**Install the console rpms**
+
+The installation of the web console can be performed with a simple *yum install* command but will pull in many dependencies from the ruby programming language.  At the time of this writing, executing the following command installed 76 addtional pacakges.
+
+	# yum install openshift-console
+	
+##**Configure authentication for the console**
+
+In a preview lab, we configured the broker application for Basic Auth.  When performing that lab, you actually configured authentication for the REST based API that the broker application provides.  One of the great things about OpenShift Enterprise is that console application uses a seperate authenticate scheme for authenticating users to the web console.  This will allow you to restrict which users you want to have access to the REST API and keep that authentication seperate from the web based user console.
+
+The openshift-console package that we installed previously in this lab created some sample authentication files for us.  These files are located in the */var/www/openshift/console/httpd/conf.d* directory.  For this lab, we are going to use the same htpasswd file that we created when setting up the Broker Application authentication.  In order to do this, simply issue the following commands:
+
+	# cd /var/www/openshift/console/httpd/conf.d
+	# mv openshift-origin-auth-remote-user-basic.conf.sample openshift-origin-auth-remote-user-basic.conf
+
+Now that we have the openshift-console packages installed, we need to start the service and ensure it starts on boot.
+
+	# service openshift-console on
+	# chkconfig openshift-console on
+	
+Once completed, the console will now prompt the user to provide their login credentials as specified in the */etc/openshift/htpasswd* file.  
+
+**Note: Seeing an error page after authenticating to the console is expected at this point.  The web console will not be fully active until we add a node server in a later lab.**
+
+
+**Lab 9 Complete!**
 <!--BREAK-->
 #**Appendix A - Installation of Red Hat Enterprise Linux**
 
