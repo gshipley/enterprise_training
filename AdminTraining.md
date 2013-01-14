@@ -3,34 +3,23 @@ Author: Grant Shipley
 Date:   Jan, 2013
 * Email: gshipley@redhat.com[]() 
 
-#**OpenShift Enterprise Administration Training - Lab Manual**
-
-
-
-
-Author: Grant Shipley
-
-Revision: 1.0
-
-<!--BREAK-->
-
 #**1.0 An overview of OpenShift Enterprise**
 ##**1.1 Assumptions**
-This lab manual assumes that you are attending an instrcutor led training class and that you will be using this lab manual in conjuction with the lecture.  
+This lab manual assumes that you are attending an instructor led training class and that you will be using this lab manual in conjunction with the lecture.  
 
-I also assume that you have been granted access to two Red Hat Enteprise Linux servers with which to perform the exercises in this lab manual.  If you do not have access to your servers, please notify the instructor.
+I also assume that you have been granted access to two Red Hat Enterprise Linux servers with which to perform the exercises in this lab manual.  If you do not have access to your servers, please notify the instructor.
 
-A working knowledge of SSH, git, yum, and familarity with a linux based text editor.  If you do not have an understanding of any of these technologies, please let the instructor know.
+ A working knowledge of SSH, git, and yum, and familiarity with a Linux-based text editor are assumed.  If you do not have an understanding of any of these technologies, please let the instructor know.
 
 ##**1.2 What you can expect to learn from this training class**
 
-At the conclusion of this training class, you should have a solid understanding of how to install and configure OpenShift Enterprise.  You should also feel comfortable in the usage of create and deploying application using the OpenShift Enterprise web console, command line tools, and JBoss Developer Studio.
+At the conclusion of this training class, you should have a solid understanding of how to install and configure OpenShift Enterprise.  You should also feel comfortable in the usage of creating and deploying applications using the OpenShift Enterprise web console, command line tools, and JBoss Developer Studio.
 
 ##**1.3 An overview of OpenShift Enterprise PaaS**
 
 Platform as a service is changing the way developers approach developing software. Developers typically use a local sandbox with their preferred application server and only deploy locally on that instance. Developers typically start JBoss locally using the startup.sh command and drop their .war or .ear file in the deployment directory and they are done.  Developers have a hard time understanding why deploying to the production infrastructure is such a time consuming process.
 
-System Adminstrators understand the complexity of not only deploying the code, but procuring, provisioning and maintaining a production level system. They need to stay up to date on the latest security patches and errata, ensure the firewall is properly configured, maintain a consistent and reliable backup and restore plan, monitor the application and servers for cpu load, disk io, http requests, etc.
+System Administrators understand the complexity of not only deploying the code, but procuring, provisioning and maintaining a production level system. They need to stay up to date on the latest security patches and errata, ensure the firewall is properly configured, maintain a consistent and reliable backup and restore plan, monitor the application and servers for cpu load, disk io, http requests, etc.
 
 OpenShift Enterprise provides developers and IT organizations an auto-scaling cloud application platform for quickly deploying new applications on secure and scalable resources with minimal configuration and management headaches. This means increased developer productivity and a faster pace in which IT can support innovation.
 
@@ -38,7 +27,7 @@ This manual will walk you through the process of installing and configuring an O
 
 ##**1.4 An overview of IaaS**
 
-The great thing about OpenShift Enterprise is that we are infrastructure agnostic. You can run OpenShift on bare metal, virtualized, or on public/private cloud instances. The only thing that is required is Red Hat Enterprise Linux as the underlying operating system. We require this in order to take advantage of SELinux and other enterprise features so that you can ensure your installation is rock solid and secure.
+The great thing about OpenShift Enterprise is that we are infrastructure agnostic. You can run OpenShift on bare metal, virtualized instances, or on public/private cloud instances. The only thing that is required is Red Hat Enterprise Linux as the underlying operating system. We require this in order to take advantage of SELinux and other enterprise features so that you can ensure your installation is rock solid and secure.
 
 What does this mean? This means that in order to take advantage of OpenShift Enterprise, you can use any existing resources that you have in your hardware pool today. It doesn’t matter if your infrastructure is based on EC2, VMWare, RHEV, Rackspace, OpenStack, CloudStack, or even bare metal as we run on top of any Red Hat Enterprise Linux operating system.
 
@@ -48,18 +37,22 @@ For this training class will be using OpenStack as our infrastructure as a servi
 
 In this training class, we are going to go into the details of installing and configuring all of the components required for OpenShift Enterprise.  We will be installing and configuring bind, MongoDB, DHCP, ActiveMQ, MCollective, and other vital pieces to OpenShift.  Doing this manually will give you a better understanding of how all of the components of OpenShift Enterprise work together to create a complete solution.
 
-That being said, once you have a solid understanding of all of the moving pieces, you will probably want to take advantage of our kickstart script that performs all the functions in the administration portion of this training on your behalf.  This script will be allow you create complete OpenShift Enterprise environments in a matter of minues.
+That being said, once you have a solid understanding of all of the moving pieces, you will probably want to take advantage of our kickstart script that performs all the functions in the administration portion of this training on your behalf.  This script will allow you to create complete OpenShift Enterprise environments in a matter of minutes.  It is not intended for you to use the kickstart as part of this training class.
 
 The kickstart script is located at:
 https://mirror.openshift.com/pub/enterprise-server/scripts/1.0/
 
-When using the kickstart script, be sure to edit the script to use the correct Red Hat subscriptions.  Take a look at the script header for full instructions.
+When using the kickstart script, be sure to edit it to use the correct Red Hat subscriptions.  Take a look at the script header for full instructions.
 
 ##**1.6 Electronic version of this document**
 
 This lab manual contains many configuration items that will need to be performed on your broker and node hosts.  Manually typing in all of these values would be a tedious and error prone effort.  To alleviate the risk of errors, and to let you concentrate on learning the material instead of typing tedious configuration items, an electronic version of the document is available at the following URL:
 
-	http://training.onopenshift.com
+	http://training.runcloudrun.com
+	
+In order to download all of the sample configuration files for the lab, enter the following command on your host:
+
+	# wget -rnp --reject index.\* http://training.runcloudrun.com/labs/
 	
 
 <!--BREAK-->
@@ -80,22 +73,22 @@ Broker host
 
 ##**Register system and apply subscription**
 
-In order to be able to update to newer packages, and to download the OpenShift Enterprise software, your system will need to be registered with Red Hat to allow your system access to appropriate software channels.  You will need the following subscription at a minimum for this class.
+In order to be able to update to newer packages, and to download the OpenShift Enterprise software, your system will need to be registered with Red Hat to allow your system access to appropriate software channels.  You will need the following subscriptions at a minimum for this class.
 
-*Red Hat Enterprise Linux Employee Subscription
-*OpenShift Enterprise Employee Subscription
+* Red Hat Enterprise Linux Employee Subscription
+* OpenShift Enterprise Employee Subscription
 
 The machines provided to you in this lab have already been registered with the production Red Hat Network.  However, they have not been enabled for the above subscriptions.  List all of the available subscriptions for the account that has been registered for you:
 
-	# subscription-manager list —available	
+	# subscription-manager list --available	
 	
 From the list provided, subscribe to Red Hat Enterprise Linux.
 
-	# subscription-manager subscribe —pool [POOL IID from previous command]
+	# subscription-manager subscribe --pool [POOL IID from previous command]
 	
-Once you have subscribed to Red Hat Enterprise Linux, the next step is subscribe to the OpenShift Enterprise Employee subscrption.  Complete that step and then verify that you are subscribed to both RHEL and OpenShift Enterprise.
+Once you have subscribed to Red Hat Enterprise Linux, the next step is subscribe to the OpenShift Enterprise Employee subscription.  Complete that step and then verify that you are subscribed to both RHEL and OpenShift Enterprise.
 
-	# subscription-manager list —consumed
+	# subscription-manager list --consumed
 	
 Also, take note of the yum repositories that you are now able to install packages from.
 
@@ -107,13 +100,15 @@ We need to update the operating system to have all of the latest packages that m
 
 	# yum update
 	
-Depeding on the network connectivity at this location, this update may take several minutes.  
+Depending on the network connectivity at this location, this update may take several minutes.  
 
 ##**Configuration of clock to avoid clock skew**
 
-OpenShift Enterprise requires NTP to synchronize the system and hardware clocks. This synchronization is necessary for communication between the broker and node hosts; if the clocks are too far out of synchronization, MCollective will drop messages.  Every MCollective request (discussed in a later lab) includes a time stamp, provided by the sending host's clock. If a sender's clock is substantially behind a recipient's clock, the recipient drops the message.  This is often referred to as clock skew as is a common problem that users encounter when they fail to sync all of the system clocks.
+OpenShift Enterprise requires NTP to synchronize the system and hardware clocks. This synchronization is necessary for communication between the broker and node hosts; if the clocks are too far out of synchronization, MCollective will drop messages.  Every MCollective request (discussed in a later lab) includes a time stamp, provided by the sending host's clock. If a sender's clock is substantially behind a recipient's clock, the recipient drops the message.  This is often referred to as clock skew and is a common problem that users encounter when they fail to sync all of the system clocks.
 
 	# ntpdate clock.redhat.com
+	# chkconfig ntpd on
+	# service ntpd start
 	
 **Lab 1 Complete!**
 
@@ -132,11 +127,13 @@ Broker host
 * text editor (vi, emacs, nano, etc)
 * environment variables
 * SELinux
-* Commands: cat, echo, chown, dnssec-keygen, rnds-confgen, restorecon, chmod, lokkit, chkconfig, service, nsupdate, ping, dig
+* Commands: cat, echo, chown, dnssec-keygen, rndc-confgen, restorecon, chmod, lokkit, chkconfig, service, nsupdate, ping, dig
+
+**Note:  For this lab, use the 192.x.x.x IP address when setting up your nameserver**
 
 ##**Install DNS Server**
 
-In order for OpenShift Enterprise to work correctly, you will need configure bind so that you have a DNS server setup.  At a typical customer site, they will have an existing DNS infrastructure in place.  However, for the purpose of this training class, we need to install and configure our own server so that name resolution works properly.  Primarily, we will be using name resolution for communication between our broker and node servers as well as dynamically updating our dns server to resolve gear application names when we start creating application gears.
+In order for OpenShift Enterprise to work correctly, you will need to configure bind so that you have a DNS server setup.  At a typical customer site, they will have an existing DNS infrastructure in place.  However, for the purpose of this training class, we need to install and configure our own server so that name resolution works properly.  Primarily, we will be using name resolution for communication between our broker and node servers as well as dynamically updating our dns server to resolve gear application names when we start creating application gears.
 
 This lab starts off by requiring the installation of both *bind* and *bind-utils* packages.
 
@@ -144,15 +141,15 @@ This lab starts off by requiring the installation of both *bind* and *bind-utils
 	
 ##**Create environment variables and DNSSEC key file**
 
-The official OpenShift documentation suggests that you set an environment variable for the domain name that you will be using which allow faster configuration of bind. Let’s follow the suggested route for this training class by issuing the following command:
+The official OpenShift documentation suggests that you set an  environment variable for the domain name that you will be using to facilitate faster configuration of bind. Let’s follow the suggested route for this training class by issuing the following command:
 
 	# domain=example.com
 	
-DNSSEC, which stands for DNS Security Extensions, is a method by which DNS servers can verify that DNS data is coming from the correct place.  You create a private/public key pair to determine to authenticaticty of the source domain name.  In order to implement DNSSEC on our OpenShift Enterprise broker node, we need to create a key file.
+DNSSEC, which stands for DNS Security Extensions, is a method by which DNS servers can verify that DNS data is coming from the correct place.  You create a private/public key pair to determine to authenticity of the source domain name server.  In order to implement DNSSEC on our new PaaS, we need to create a key file, which we will store in /var/named.  For convenience, set the $keyfile variable now to the location of the this key file:
 
 	# keyfile=/var/named/${domain}.key
 	
-Create a DNSSEC key pair and store the key in a variable named key by using the following commands:
+Create a DNSSEC key pair and store the private key in a variable named $key by using the following commands:
 
 	# cd /var/named
 	# dnssec-keygen -a HMAC-MD5 -b 512 -n USER -r /dev/urandom ${domain}
@@ -164,17 +161,19 @@ Verify that the key was created properly by viewing the contents of the key vari
 
 	# echo $KEY
 	
-Configure the ownership, permissions, and SELinux context for the key we created.
+Configure the ownership, permissions, and SELinux context for the key we created:
 
 	# restorecon -v /etc/rndc.* /etc/named.*
 	# chown -v root:named /etc/rndc.key
 	# chmod -v 640 /etc/rndc.key
 
-##**Create fowards.conf configuration file for host name resolution**
+##**Create fowarders.conf configuration file for host name resolution**
 
 The DNS forwarding facility of BIND can be used to create a large site-wide cache on a few servers, reducing traffic over links to external nameservers. It can also be used to allow queries by servers that do not have direct access to the Internet, but wish to look up exterior names anyway. Forwarding occurs only on those queries for which the server is not authoritative and does not have the answer in its cache.
 
 Create a forwards.conf file with the following commands:
+
+**The forwarders.conf file is available on the lab support website**
 
 	# echo "forwarders { 8.8.8.8; 8.8.4.4; } ;" >> /var/named/forwarders.conf
 	# restorecon -v /var/named/forwarders.conf
@@ -182,12 +181,14 @@ Create a forwards.conf file with the following commands:
 	
 ##**Configure subdomain resolution and create database**
 
-To ensure that we are starting with a clean */var/named/dynamic* directory, lets remove this directory if it exists.
+To ensure that we are starting with a clean */var/named/dynamic* directory, let’s remove this directory if it exists:
 
 	# rm -rvf /var/named/dynamic
 	# mkdir -vp /var/named/dynamic
 	
-Issue the following command to create ${domain}.db file. Before running this command, verify that you the domain variable you set earlier in this lab is available to your current session.
+Issue the following command to create the *${domain}.db* file (before running  this command, verify that the domain variable you set earlier in  this lab is available to your current session):
+
+**The example.com.db file is available on the lab support website**
 
 	cat <<EOF > /var/named/dynamic/${domain}.db
 	\$ORIGIN .
@@ -205,7 +206,7 @@ Issue the following command to create ${domain}.db file. Before running this com
 	ns1			A	127.0.0.1
 	EOF
 	
-Once you have entered the above echo command, cat the contents of the file to ensure that the command was successful.
+Once you have entered the above echo command, cat the contents of the file to ensure that the command was successful:
 
 	# cat /var/named/dynamic/${domain}.db
 	
@@ -241,7 +242,9 @@ Set the correct permissions and context:
 
 ##**Create our named configuration file**
 
-We also need to create our named.conf file,   Before running this command, verify that you the domain variable you set earlier in this lab is available to your current session.
+We also need to create our *named.conf* file,   Before running the following command, verify that the domain variable you set earlier in this lab is available to your current session.
+
+**The */etc/named.conf* file is available on the lab support website**
 
 	cat <<EOF > /etc/named.conf
 	// named.conf
@@ -295,18 +298,18 @@ We also need to create our named.conf file,   Before running this command, verif
 	};
 	EOF
 	
-And finally, set the permissions for the new configuration file that we just created.
+And finally, set the permissions for the new configuration file that we just created:
 
 	# chown -v root:named /etc/named.conf
 	# restorecon /etc/named.conf
 
 ##**Configure host name resolution to use new bind server**
 
-We need to update our resolve.conf file to use our local *named* service that we just installed and configured.  Open up your */etc/resolv.conf* file and add the following entry:
+We need to update our resolv.conf file to use our local *named* service that we just installed and configured.  Open up your */etc/resolv.conf* file and add the following entry **as the first nameserver entry in the file**:
 
 	nameserver 127.0.0.1
 	
-We also need to make sure that *named* starts on boot and the firewall is configured to pass through dns traffic.
+We also need to make sure that *named* starts on boot and that the firewall is configured to pass through DNS traffic:
 
 	# lokkit --service=dns
 	# chkconfig named on
@@ -317,11 +320,11 @@ We are finally ready to start up our new dns server and add some updates.
 
 	# service named start
 	
-You should see a confirmation message that the service was started correctly.  If you do not see an OK message, I would suggest running through the above steps again and ensure that the output of each command matches the contents of this exercise.  If you are still having trouble after trying the steps again, ask the instructor for help.
+You should see a confirmation message that the service was started correctly.  If you do not see an OK message, I would suggest running through the above steps again and ensuring that the output of each command matches the contents of this exercise.  If you are still having trouble after trying the steps again, ask the instructor for help.
 
 ##**Add entries using nsupdate**
 
-Now that our bind server is configured and started, we need to add our broker node to our DNS entries.  To accomplish this task, we will use the nsupdate command, which opens an interactive shell where we can perform commands.
+Now that our BIND server is configured and started, we need to add a record for our broker node to BIND’s database.  To accomplish this task, we will use the nsupdate command, which opens an interactive shell where we can perform commands:
 
 	# nsupdate -k ${keyfile}
 	> server 127.0.0.1
@@ -330,6 +333,10 @@ Now that our bind server is configured and started, we need to add our broker no
 	> send
 	
 Press control-D to exit from the interactive session.
+
+If you are not sure which IP address to use, run the following command and use the 192.x.x.x IP address that is returned:
+
+	# ifconfig
 
 In order to verify that you have successfully added broker.example.com to your dns server, you can perform
 
@@ -356,7 +363,7 @@ Broker host
 
 ##**Create dhclient-eth0.conf**
 
-In order to configure your broker host to use a DNS server that we installed in a previous lab, you will need to edit the */etc/dhcp/dhclient-{$network device}.conf file*.  Without this step, the DNS server information in resolve.conf would default back the server returned from your DHCP server on the next boot of the server.  For example, if you are using eth0 as your default ethernet device, you would need to edit the following file:
+In order to configure your broker host to use a DNS server that we installed in a previous lab, you will need to edit the */etc/dhcp/dhclient-{$network device}.conf file* or create the file if it does not exist.  Without this step, the DNS server information in */etc/resolv.conf* would default back the server returned from your DHCP server on the next boot of the server.  For example, if you are using eth0 as your default ethernet device, you would need to edit the following file:
 
 	/etc/dhcp/dhclient-eth0.conf
 	
@@ -370,7 +377,7 @@ Once you have the correct file opened, add the following information making sure
 	
 ##**Set the host name for your server**
 
-You need to set the hostname of your broker node.  In order to accomplish this task, edit the */etc/sysconfig/network* file and locate the section labeled *HOSTNAME*.  The line that you want to replace should look like this:
+You need to set the hostname of your broker host.  In order to accomplish this task, edit the */etc/sysconfig/network* file and locate the section labeled *HOSTNAME*.  The line that you want to replace should look like this:
 
 	HOSTNAME=localhost.localdomain
 	
@@ -378,7 +385,7 @@ We need to change this to reflect the new hostname that we are going to apply fo
 
 	HOSTNAME=broker.example.com
 	
-Now that we have configured our hostname, we also need to set it for our current session but using the following command:
+Now that we have configured our hostname, we also need to set it for our current session by using the following command:
 
 	# hostname broker.example.com
 
@@ -402,15 +409,15 @@ Broker host
 * service
 
 
-OpenShift Enterprise makes heavy use of MongoDB for storing internal information about users, gears, and other necessary items.  If you are not familiar with MongoDB, I suggest that you had over the offical MongoDB site (http://www.mongodb.org) to read up on this great NoSQL database.  For the puprose of this lab, you need to know that MongoDB is a document data storage system and uses javascript for the command syntax and stores all documents in a JSON format.
+OpenShift Enterprise makes heavy use of MongoDB for storing internal information about users, gears, and other necessary items.  If you are not familiar with MongoDB, I suggest that you head over the official MongoDB site (http://www.mongodb.org) to read up on this great NoSQL database.  For the purpose of this lab, you need to know that MongoDB is a document data storage system and uses javascript for the command syntax and stores all documents in a JSON format.
 
 ##**Install *mongod* server**
 
-In order to use MongoDB, we will need to install the mongod server.  To accomplish this tasks on Red Hat Enterprise Linux with an OpenShift Enterprise subscription, simply issue the following command:
+In order to use MongoDB, we will need to install the mongod server.  To accomplish these tasks on Red Hat Enterprise Linux with an OpenShift Enterprise subscription, simply issue the following command:
 
 	# yum install mongodb-server
 
-At the time of this writing, you should see the following package being installed:
+At the time of this writing, you should see the following packages being installed:
 
 | Package Name | Arch| Package Version|Repo|Size
 | :----------------  | :--- |
@@ -424,17 +431,21 @@ At the time of this writing, you should see the following package being installe
 
 ##**Configure *mongod* server**
 
- MongoDB uses a configuration file for its settings.  This file can be found at */etc/mongodb.conf*.  We need to make a few changes to this file to ensure that we handle authentication correctly and that we enable the ability to use small files.  Go ahead and edit the configuration file and ensure the two following conditions are set correctly:
+MongoDB uses a configuration file for its settings.  This file can be found at */etc/mongodb.conf*.  We need to make a few changes to this file to ensure that we handle authentication correctly and that we enable the ability to use small files.  Go ahead and edit the configuration file and ensure the two following conditions are set correctly:
+ 
+ **The */etc/mongodb.conf* file is available on the lab support website**
  
  	auth=true
  	
- By default, this line is commented out so just remove the comment.  We also need to enable smallfiles, so add the following line.
+By default, this line is commented out so just remove the hash mark *(#)*at the begining of the line to enable the setting. We also need to enable smallfiles, so add the following line:
  
  	smallfiles=true
  	
-##**Confgure *mongod* to start on boot**
+Setting *smallfiles=true* configures MongoDB not to pre-allocate a huge database, which wastes a surprising amount of time and disk space and is unnecessary for the comparatively small amount of data that the broker will store in it.  It wouldn't hurt anything not to set *smallfiles=true*, except that it would take a minute or two to initialize a larger database and waste about half a gigabyte of disk space.
+ 	
+##**Configure *mongod* to start on boot**
 
-MongoDB is an essential part of the OpenShift Enterprise platform.  Because of this, we need to ensure that *mongod* is configured to start on system boot and we also need to ensure the database is started for our current use.  
+MongoDB is an essential part of the OpenShift Enterprise platform.  Because of this, we need to ensure that mongod is configured to start on system boot:
 
 	# chkconfig mongod on
 	
@@ -446,7 +457,7 @@ This should return - *mongod is stopped*.  In order to start the service, simply
 
 	# service mongod start
 	
-We need to verify that mongod was installed and configured correctly.  In order to do this, we are going to make use of the mongo shell client tool.  If you are more familair with mysql or postgres, this is similar to the mysql client where you are dropped into an interactive SQL shell.  Remember, MongoDB is a NoSQL database so the notion of entering SQL commands are non-existant.  In order to start the mongo shell, enter the following command:
+We need to verify that mongod was installed and configured correctly.  In order to do this, we are going to make use of the mongo shell client tool.  If you are more familiar with mysql or postgres, this is similar to the mysql client where you are dropped into an interactive SQL shell.  Remember, MongoDB is a NoSQL database, so the notion of entering SQL commands is nonexistent.  In order to start the mongo shell, enter the following command:
 
 	# mongo
 	
@@ -478,7 +489,7 @@ Broker host
 * chkconfig
 * service
 
-ActiveMQ is a fully open source messenger service that is available for use across many different programming languages and environments.  OpenShift Enterprise makes use of this technology to handle communications between the broker host and the node hosts in our deployment.  In order to make use of this messenging service, we need to install and configure ActiveMQ for use on our broker node.
+ActiveMQ is a fully open source messenger service that is available for use across many different programming languages and environments.  OpenShift Enterprise makes use of this technology to handle communications between the broker host and the node hosts in our deployment.  In order to make use of this messaging service, we need to install and configure ActiveMQ for use on our broker node.
 
 ##**Install ActiveMQ**
 
@@ -486,7 +497,7 @@ Installing ActiveMQ on Red Hat Enterprise Linux 6 is a fairly easy and straightf
 
 	# yum install activemq activemq-client
 	
-You will notice that is will also install any of the dependendicies required for the packages if you don’t already have them.  Notebally, java 1.6 and the libraries for use with the ruby programming language.
+You will notice that is will also install any of the dependencies required for the packages if you don’t already have them.  Notably, java 1.6 and the libraries for use with the ruby programming language.
 
 ##**Configure ActiveMQ**
 
@@ -496,9 +507,11 @@ ActiveMQ uses an xml configuration file that is located at */etc/activemq/active
 	# mv activemq.xml activemq.orig
 	# wget https://mirror.openshift.com/pub/enterprise-server/scripts/1.0/activemq.xml
 	
-The above command will backup the default configuration file that ships with ActiveMQ and replace it with one configured for use with OpenShift Enteprise.  Now that we have the configuration template, we need to make a few minor changes to the configuration.  
+The above command will backup the default configuration file that ships with ActiveMQ and replace it with one configured for use with OpenShift Enterprise.  Now that we have the configuration template, we need to make a few minor changes to the configuration.  
 
 The first change we need to make is to replace the hostname provided (activemq.example.com) to the FQDN of your broker host. For example, the following line:
+
+**The activemq.xml file is available on the lab support website**
 
 	<broker xmlns="http://activemq.apache.org/schema/core" brokerName="activemq.example.com" dataDirectory="${activemq.data}">
 	
@@ -516,7 +529,7 @@ The second change is to provide your own credentials for authentication.  The au
        </users>
      </simpleAuthenticationPlugin>
  
- ##**Modify firewall and configure ActiceMQ to start on boot**
+##**Modify firewall and configure ActiveMQ to start on boot**
 
 We need to modify the firewall rules to allow MCollective to communicate on port 61613.  
 
@@ -527,7 +540,7 @@ Finally, we need to enable the ActiveMQ service to start on boot as well as star
 	# chkconfig activemq on
 	# service activemq start
 	
- ##**Verify ActiceMQ is working**
+##**Verify ActiveMQ is working**
 
 Now that ActiveMQ has been installed, configured, and started, let’s verify that the web console is working as expected.  ActiveMQ web console should be running and listening on port 8161.  In order to verify that everything worked correctly, load the following URL in a web browser:
 
@@ -560,15 +573,17 @@ Broker host
 
 For communication between the broker host and the gear nodes, OpenShift Enterprise uses MCollective.  You may be wondering how MCollective is different from ActiveMQ, that we installed in a previous lab.  ActiveMQ is the messenger server that provides a queue of transport messages.  You can think of MCollective as the client that actually sends and receives those messages.  For example, if we want to create a new gear on an OpenShift Enterprise node, MCollective would receive the create gear message from ActiveMQ and perform the operation.
 
- ##**Installation of MCollective client**
+##**Installation of MCollective client**
  
  In order to use MCollective, we need to install and configure it.
 	
 	# yum install mcollective-client
 	
- ##**Configuration of MCollective client**
+##**Configuration of MCollective client**
 
 Replace the contents of the */etc/mcollective/client.cfg* with the following information:
+
+**The */etc/mcollective/client.cfg* file is available on the lab support website**
 
 	topicprefix = /topic/
 	main_collective = mcollective
@@ -614,7 +629,7 @@ Broker host
 	
 ##**Install necessary packages for the broker application**
  
- In order for users to interact with the OpenShift Enteprise Platform, they will typically use client tools or the web console.  These tools communicate with the broker via a REST API that is also accessbile for writing third party applications and tools.  In order to use the broker application, we need to install several packages from the OpenShift Enterprise repository.
+ In order for users to interact with the OpenShift Enterprise Platform, they will typically use client tools or the web console.  These tools communicate with the broker via a REST API that is also accessible for writing third party applications and tools.  In order to use the broker application, we need to install several packages from the OpenShift Enterprise repository.
 
 	# yum install openshift-origin-broker openshift-origin-broker-util rubygem-openshift-origin-auth-remote-user rubygem-openshift-origin-msg-broker-mcollective rubygem-openshift-origin-dns-bind
 	
@@ -626,7 +641,7 @@ The default value of the ServerName property is localhost, and you need to chang
 
 	# sed -i -e "s/ServerName .*$/ServerName `hostname`/" /etc/httpd/conf.d/000000_openshift_origin_broker_proxy.conf
 	
-**Note:** You can also manually update the */etc/httpd/conf.d/000000_openshift_origin_broker_proxy.conf* and modify the ServerName attribute to reflect the corrent hostname.
+**Note:** You can also manually update the */etc/httpd/conf.d/000000_openshift_origin_broker_proxy.conf* and modify the ServerName attribute to reflect the correct hostname.
   
 ##**Configure start on boot and firewall for services**
 
@@ -650,16 +665,19 @@ We now need to generate access keys that will allow some of the services, Jenkin
 	# openssl genrsa -out /etc/openshift/server_priv.pem 2048
 	# openssl rsa -in /etc/openshift/server_priv.pem -pubout > /etc/openshift/server_pub.pem
 	
-We also need to generate a ssh key pair that will allow communication between the broker host and any nodes that you have configured.  Remember, the broker host is the dirctor of communications and the node hosts actually contain all of the application gears that your users create.  In order to generate this SSH keypair, perform the following commands:
+We also need to generate a ssh key pair that will allow communication between the broker host and any nodes that you have configured.  Remember, the broker host is the director of communications and the node hosts actually contain all of the application gears that your users create.  In order to generate this SSH keypair, perform the following commands:
 
 	# ssh-keygen -t rsa -b 2048 -f ~/.ssh/rsync_id_rsa
+	
+Just press enter for the password.
+
 	# cp ~/.ssh/rsync_id_rsa* /etc/openshift/
 	
 In a later lab that covers configuration of the node hosts, we will copy this newly created key to each node host.
 
 ##**Configure SELinux Variables and set proper contexts**
 
-SELinux has several variablea that we want to ensure is set correctly.  These variables include the following:
+SELinux has several variables that we want to ensure is set correctly.  These variables include the following:
 
 
 | Variable Name | Description|
@@ -687,7 +705,7 @@ We also need to set several files and directories with the proper SELinux contex
 
 The OpenShift Enterprise Broker uses a configuration file to define several of the attributes for controlling how the platform as a service works.  This configuration file is located at */etc/openshift/broker.conf*.  For instance, the valid gear types that a user can create are defined using the *VALID_GEAR_SIZES* variable.
 
-	# Comma seperted list of valid gear sizes
+	# Comma separated list of valid gear sizes
 	VALID_GEAR_SIZES="small,medium"
 	
 Edit this file and ensure that the *CLOUD_DOMAIN* variable is set to correctly reflect the domain that you are using to configure this deployment of OpenShift Enterprise.
@@ -712,7 +730,7 @@ Broker host
 * text editor
 * cat
 * echo
-* envirionment variables
+* environment variables
 * pushd
 * semodule
 * htpasswd
@@ -721,7 +739,7 @@ Broker host
 * chkconfig
 * service
 	
-OpenShift Enterprise uses a plugin system for core system components such as DNS, authentication, and messenging.  In order to make use of these plugins, we need to configure them and provide the correct configuration items to ensure that they work correclty.  The plugin configuration files are located in the */etc/openshift/plugins.d* directory.  We will be working with several of these files so it is suggested that you change to that directory to complete the steps in this lab.
+OpenShift Enterprise uses a plugin system for core system components such as DNS, authentication, and messaging.  In order to make use of these plugins, we need to configure them and provide the correct configuration items to ensure that they work correctly.  The plugin configuration files are located in the */etc/openshift/plugins.d* directory.  We will be working with several of these files so it is suggested that you change to that directory to complete the steps in this lab.
 
 	# cd /etc/openshift/plugins.d
 	
@@ -740,7 +758,7 @@ Let’s begin by copying the .example files to actual configuration files that w
 
 ##**Configure the DNS plugin**
 
-Instead of copying the example DNS configuration file, we are going to create a new one by issueing an echo command.  We are doing this to take advantage of the $domain and $keyfile environment variables that we created in a previous lab.  If you are no longer have these variables set, you can recreate them with the following commands:
+Instead of copying the example DNS configuration file, we are going to create a new one by issuing an echo command.  We are doing this to take advantage of the $domain and $keyfile environment variables that we created in a previous lab.  If you are no longer have these variables set, you can recreate them with the following commands:
 
 	# domain=example.com
 	# keyfile=/var/named/${domain}.key
@@ -752,7 +770,7 @@ To verify that your variables were recreated correctly, echo the contents of you
 	# cat $keyfile
 	# echo $KEY
 	
-If you perfomed the above steps correctly, you should see output similiar to this:
+If you performed the above steps correctly, you should see output similar to this:
 
 	key example.com {
   		algorithm HMAC-MD5;
@@ -769,7 +787,7 @@ Now that we have our variables setup correctly, we can create our *openshift-ori
 	BIND_ZONE="${domain}"
 	EOF
 	
-After running this command, cat the contents of the file and ensure they look similiar to the following:
+After running this command, cat the contents of the file and ensure they look similar to the following:
 
 	BIND_SERVER="127.0.0.1"
 	BIND_PORT=53
@@ -784,7 +802,7 @@ The last step to configure DNS is to compile and install the SELinux policy for 
 
 ##**Configure Authentication**
 
-OpenShift Enterprise supports various different authentication systems for authorizing a user.  In a production environment, you will probably want to use LDAP, kerberos, or some other enteprise class authorization and authenication system.  However, for this lab we will use a system called Basic Auth which relies on a *htpasswd* file to configure authentication.  OpenShift Enterprise provides three example authentication configuration files in the */var/www/openshift/broker/httpd/conf.d/* directory.
+OpenShift Enterprise supports various different authentication systems for authorizing a user.  In a production environment, you will probably want to use LDAP, kerberos, or some other enterprise class authorization and authentication system.  However, for this lab we will use a system called Basic Auth which relies on a *htpasswd* file to configure authentication.  OpenShift Enterprise provides three example authentication configuration files in the */var/www/openshift/broker/httpd/conf.d/* directory.
 
  Authentication Type | Description|
 | :---------------  | :------------ |
@@ -815,9 +833,9 @@ As previously discussed in this training class, OpenShift Enterprise makes heavy
 
 	# cat /etc/openshift/broker.conf |grep MONGO
 	
-you will see that by default, the broker application is expecting a mongodb user to be created called *openshift* with a password of *mooo*.  At this point, you can either create a user with those credentials or create a seperate user.  If you create a seperate user, ensure that you modify the broker.conf file to reflect the correct credentials.
+you will see that by default, the broker application is expecting a mongodb user to be created called *openshift* with a password of *mooo*.  At this point, you can either create a user with those credentials or create a separate user.  If you create a separate user, ensure that you modify the broker.conf file to reflect the correct credentials.
 
-	# mongo openshift_broker_dev --eval 'db.addUser("openshift", “mooo”)’
+	# mongo openshift_broker_dev --eval 'db.addUser("openshift", "mooo")'
 	
 Once you have entered the above command, you should see the following output:
 
@@ -873,13 +891,13 @@ In this lab we want to install the OpenShift Enterprise Web Console.  The consol
 
 ##**Install the web console rpms**
 
-The installation of the web console can be performed with a simple *yum install* command but will pull in many dependencies from the ruby programming language.  At the time of this writing, executing the following command installed 76 addtional pacakges.
+The installation of the web console can be performed with a simple *yum install* command but will pull in many dependencies from the ruby programming language.  At the time of this writing, executing the following command installed 76 additional packages.
 
 	# yum install openshift-console
 	
 ##**Configure authentication for the console**
 
-In a preview lab, we configured the broker application for Basic Auth.  When performing that lab, you actually configured authentication for the REST based API that the broker application provides.  One of the great things about OpenShift Enterprise is that console application uses a seperate authenticate scheme for authenticating users to the web console.  This will allow you to restrict which users you want to have access to the REST API and keep that authentication seperate from the web based user console.
+In a previous lab, we configured the broker application for Basic Auth.  When performing that lab, you actually configured authentication for the REST based API that the broker application provides.  One of the great things about OpenShift Enterprise is that console application uses a separate authenticate scheme for authenticating users to the web console.  This will allow you to restrict which users you want to have access to the REST API and keep that authentication separate from the web based user console.
 
 The openshift-console package that we installed previously in this lab created some sample authentication files for us.  These files are located in the */var/www/openshift/console/httpd/conf.d* directory.  For this lab, we are going to use the same htpasswd file that we created when setting up the Broker Application authentication.  In order to do this, simply issue the following commands:
 
@@ -888,7 +906,7 @@ The openshift-console package that we installed previously in this lab created s
 
 Now that we have the openshift-console packages installed, we need to start the service and ensure it starts on boot.
 
-	# service openshift-console on
+	# service openshift-console start
 	# chkconfig openshift-console on
 	
 Once completed, the console will now prompt the user to provide their login credentials as specified in the */etc/openshift/htpasswd* file.  
@@ -909,6 +927,7 @@ broker host
 
 * text editor
 * yum
+* ntpdate
 * dig
 * oo-register-dns
 * cat
@@ -919,15 +938,21 @@ broker host
 
 ##**Update node host with subscriptions and latest packages**
 
-During the training class, you were provided with credentials for two servers, a broker host and a node host.  This lab begin the configuration of your node / gear host.  
+During the training class, you were provided with credentials for two servers, a broker host and a node host.  This lab begins with the configuration of your node / gear host.  
 
 Once you have successfully subscribed to the correct products, ensure that your operating system is updated to the latest packages.
 
 	# yum update
 	
+##**Configuration of clock to avoid clock skew**
+
+OpenShift Enterprise requires NTP to synchronize the system and hardware clocks. This synchronization is necessary for communication between the broker and node hosts; if the clocks are too far out of synchronization, MCollective will drop messages.  Every MCollective request includes a time stamp, provided by the sending host's clock. If a sender's clock is substantially behind a recipient's clock, the recipient drops the message.  This is often referred to as clock skew as is a common problem that users encounter when they fail to sync all of the system clocks.
+
+	# ntpdate clock.redhat.com
+	
 ##**Configure broker application host**
 
-SSH to your broker application node that we configured in the previous labs and set a varaible that points to your keyfile.  If you have been using example.com, as stated in this lab manual, the following command should work.
+SSH to your broker application node that we configured in the previous labs and set a variable that points to your keyfile.  If you have been using example.com, as stated in this lab manual, the following command should work.
 
 	# keyfile=/var/named/example.com.key
 
@@ -986,7 +1011,7 @@ We also need to set the hostname for our current session but issuing the hostnam
 
 	# hostname node.example.com
 	
-Verify that the hostname was set correctly by running the hostname command.  If the hostname was set correclty, you should *node.example.com* as the output of the hostname command.
+Verify that the hostname was set correctly by running the hostname command.  If the hostname was set correctly, you should *node.example.com* as the output of the hostname command.
 
 	# hostname
 
@@ -1008,7 +1033,7 @@ node host
 * service
 * mco ping
 
-If you recall, MCollective is the tool that OpenShift Enterprise uses to send and receive messages from the ActiveMQ messenging server.  In order for the node host, the client, to send and receive messages with the broker application, we need to install and configure MCollective on the node host to communicate with the broker application.
+If you recall, MCollective is the tool that OpenShift Enterprise uses to send and receive messages from the ActiveMQ messaging server.  In order for the node host, the client, to send and receive messages with the broker application, we need to install and configure MCollective on the node host to communicate with the broker application.
 
 ##**Install MCollective on node host**
 
@@ -1019,6 +1044,8 @@ In order to install MCollective on the node host, we will need to install the *o
 ##**Configure MCollective on node host**
 
 Now that we have MCollective installed on the node host, we need to configure the package to be able to communicate with the broker application service.  In order to accomplish this, we want to replace the contents of the MCollective server.cfg configuration file to point to our correct stomp host.  Edit the */etc/mcollective/server.cfg* file and add the following information.  If you used a different hostname for your broker application host, ensure that you provide the correct stomp host.  You also need to ensure that you use the same username and password that you specified in the ActiveMQ configuration on the broker host.
+
+**The */etc/mcollective/server.cfg* file is available on the lab support website**
 
 	topicprefix = /topic/
 	main_collective = mcollective
@@ -1101,9 +1128,9 @@ OpenShift Enterprise gears can be created based upon a cartridge that exists in 
 * openshift-origin-cartridge-python-2.6 	Python 2.6 support
 * openshift-origin-cartridge-ruby-1.8 	Ruby Rack support running on Phusion Passenger (Ruby 1.8) 
 
-If you want to provide scalable PHP applicaitons for your consumers, you would want to install the openshift-origin-cartridge-haproxy-1.4 and the openshift-origin-cartridge-php-5.3 cartridges.
+If you want to provide scalable PHP applications for your consumers, you would want to install the openshift-origin-cartridge-haproxy-1.4 and the openshift-origin-cartridge-php-5.3 cartridges.
 
-For database and other system related funtionality, OpenShift enterprise provides the following:
+For database and other system related functionality, OpenShift enterprise provides the following:
 
 * openshift-origin-cartridge-cron-1.4 	Embedded crond support
 * openshift-origin-cartridge-jenkins-client-1.4 	Embedded jenkins client
@@ -1165,6 +1192,8 @@ The pam_namespace PAM module sets up a private namespace for a session with poly
 
 You also need to enter the following script on the command line:
 
+**This script is available for download from the lab support website.**
+
 	for f in "runuser" "runuser-l" "sshd" "su" "system-auth-ac"; \
 	do t="/etc/pam.d/$f"; \
 	if ! grep -q "pam_namespace.so" "$t"; \
@@ -1223,13 +1252,15 @@ In order to add the usrquote option to this mount point, change the entry to the
 
 	/dev/mapper/VolGroup-lv_root /                       ext4    defaults,usrquota        1 1
 	
+**This file is available for download from the lab support website.**
+
 For the usrquota option to take effect, we need to reboot the node host or simply remount the filesystem.
 
 	# mount -o remount /
 	
 And then generate user quota info for the mount point:
 	
-		# quotacheck -cmug /
+	# quotacheck -cmug /
 
 
 **Lab 13 Complete!**
@@ -1319,7 +1350,7 @@ When a developer pushes a change up to their OpenShift Enterprise gear, an SSH c
 	
 ##**Configure Proxy for node**
 
-Multiple application gears can and will reside on the same node host.  In order for these application to receive http requests to the node, we need to configure a proxy that will pass traffic to the gear application that is listenting for conenctions on the loopback address.  We need to open up a range of ports that the node can accept traffic on as well as ensure the port-proxy is started on boot.
+Multiple application gears can and will reside on the same node host.  In order for these application to receive http requests to the node, we need to configure a proxy that will pass traffic to the gear application that is listening for connections on the loopback address.  We need to open up a range of ports that the node can accept traffic on as well as ensure the port-proxy is started on boot.
 
 	# lokkit --port=35531-65535:tcp
 	# chkconfig openshift-port-proxy on
@@ -1331,7 +1362,7 @@ If a node is restarted, we want to ensure that the gear applications are also re
 	
 ##**Configure node settings for domain name**
 
-Edit the */etc/openshift/node.conf* file and specify the correct settings for your *CLOUD_DOMAIN, PUBLIC_HOSTNAME, AND BROKER_HOST* IP address.  For example, given the information in thislab, my settings are as follows:
+Edit the */etc/openshift/node.conf* file and specify the correct settings for your *CLOUD_DOMAIN, PUBLIC_HOSTNAME, AND BROKER_HOST* IP address.  For example, given the information in this lab, my settings are as follows:
 
 	PUBLIC_HOSTNAME="node.example.com"       # The node host's public hostname
 	PUBLIC_IP=“10.10.10.10”                                      # The node host's public IP address
