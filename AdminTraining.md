@@ -17,7 +17,7 @@ At the conclusion of this training class, you should have a solid understanding 
 
 ##**1.3 An overview of OpenShift Enterprise PaaS**
 
-Platform as a service is changing the way developers approach developing software. Developers typically use a local sandbox with their preferred application server and only deploy locally on that instance. Developers typically start JBoss locally using the startup.sh command and drop their .war or .ear file in the deployment directory and they are done.  Developers have a hard time understanding why deploying to the production infrastructure is such a time consuming process.
+Platform as a Service is changing the way developers approach developing software. Developers typically use a local sandbox with their preferred application server and only deploy locally on that instance. Developers typically start JBoss locally using the startup.sh command and drop their .war or .ear file in the deployment directory and they are done.  Developers have a hard time understanding why deploying to the production infrastructure is such a time consuming process.
 
 System Administrators understand the complexity of not only deploying the code, but procuring, provisioning and maintaining a production level system. They need to stay up to date on the latest security patches and errata, ensure the firewall is properly configured, maintain a consistent and reliable backup and restore plan, monitor the application and servers for cpu load, disk io, http requests, etc.
 
@@ -29,7 +29,7 @@ This manual will walk you through the process of installing and configuring an O
 
 The great thing about OpenShift Enterprise is that we are infrastructure agnostic. You can run OpenShift on bare metal, virtualized instances, or on public/private cloud instances. The only thing that is required is Red Hat Enterprise Linux as the underlying operating system. We require this in order to take advantage of SELinux and other enterprise features so that you can ensure your installation is rock solid and secure.
 
-What does this mean? This means that in order to take advantage of OpenShift Enterprise, you can use any existing resources that you have in your hardware pool today. It doesn’t matter if your infrastructure is based on EC2, VMWare, RHEV, Rackspace, OpenStack, CloudStack, or even bare metal as we run on top of any Red Hat Enterprise Linux operating system.
+What does this mean? This means that in order to take advantage of OpenShift Enterprise, you can use any existing resources that you have in your hardware pool today. It doesn’t matter if your infrastructure is based on EC2, VMWare, RHEV, Rackspace, OpenStack, CloudStack, or even bare metal as we run on top of any Red Hat Enterprise Linux operating system as long as the architecture is x86_64.
 
 For this training class will be using OpenStack as our infrastructure as a service layer.
 
@@ -56,8 +56,7 @@ In order to download all of the sample configuration files for the lab, enter th
 	
 
 <!--BREAK-->
-
-#**Lab 1: Register and update Operating system (Estimated time: xx minutes)**
+#**Lab 1: Register and update operating system (Estimated time: 10 minutes)**
 
 **Server used:**
 
@@ -100,7 +99,7 @@ We need to update the operating system to have all of the latest packages that m
 
 	# yum update
 	
-Depending on the network connectivity at this location, this update may take several minutes.  
+**Note:** Depending on your connection and speed of your broker host, this installation make take several minutes.
 
 ##**Configuration of clock to avoid clock skew**
 
@@ -114,7 +113,7 @@ OpenShift Enterprise requires NTP to synchronize the system and hardware clocks.
 
 <!--BREAK-->
 
-#**Lab 2: Installation and configuration of DNS (Estimated time: xx minutes)**
+#**Lab 2: Installation and configuration of DNS (Estimated time: 20 minutes)**
 
 **Server used:**
 
@@ -324,7 +323,7 @@ You should see a confirmation message that the service was started correctly.  I
 
 ##**Add entries using nsupdate**
 
-Now that our BIND server is configured and started, we need to add a record for our broker node to BIND’s database.  To accomplish this task, we will use the nsupdate command, which opens an interactive shell where we can perform commands:
+Now that our BIND server is configured and started, we need to add a record for our broker node to BIND’s database.  To accomplish this task, we will use the nsupdate command, which opens an interactive shell where we can perform commands, **using the 10.x.x.x address provided to you**:
 
 	# nsupdate -k ${keyfile}
 	> server 127.0.0.1
@@ -333,10 +332,6 @@ Now that our BIND server is configured and started, we need to add a record for 
 	> send
 	
 Press control-D to exit from the interactive session.
-
-If you are not sure which IP address to use, run the following command and use the 192.x.x.x IP address that is returned:
-
-	# ifconfig
 
 In order to verify that you have successfully added broker.example.com to your DNS server, you can perform
 
@@ -350,7 +345,7 @@ and it should resolve to the local machine that you are working on.  You can als
 
 <!--BREAK-->
 
-#**Lab 3: Configure dhclient-eth0.conf and set the hostname (Estimated time: xx minutes)**
+#**Lab 3: Configure dhclient-eth0.conf and set the hostname (Estimated time: 5 minutes)**
 
 **Server used:**
 
@@ -394,7 +389,7 @@ Now that we have configured our hostname, we also need to set it for our current
 
 <!--BREAK-->
 
-#**Lab 4: Installation and Configuration of MongoDB (Estimated time: xx minutes)**
+#**Lab 4: Installation and Configuration of MongoDB (Estimated time: 10 minutes)**
 
 **Server used:**
 
@@ -474,7 +469,7 @@ You will then be presented with a list of valid databases that are currently ava
 
 <!--BREAK-->
 
-#**Lab 5: Installation and Configuration of ActiveMQ (Estimated time: xx minutes)**
+#**Lab 5: Installation and Configuration of ActiveMQ (Estimated time: 10 minutes)**
 
 **Server used:**
 
@@ -552,7 +547,7 @@ Now that ActiveMQ has been installed, configured, and started, let’s verify th
 	# ssh -f -N -L 8161:broker.example.com:8161 root@10.10.10.10
 
 
-![title](file://localhost/Users/gshipley/Dropbox/Shifters/Blog%20Posts/Grant/Enterprise/images-post2/activemqconsole.png)
+![](http://training.runcloudrun.com/images/activemqconsole.png)
 
 **Note:**  While we changed the authentication credentials for the ActiveMQ service itself, the above configuration requires no authentication for accessing the activemq console, which can still be accessed via a Web interface with default the credentials.  For a production deployment, you would want to restrict access to localhost (127.0.0.1) and require authentication.  The authentication information is stored in the */etc/activemq/jetty.xml* configuration file as well as the */etc/activemq/jetty-realm.properties* file.
 
@@ -560,7 +555,7 @@ Now that ActiveMQ has been installed, configured, and started, let’s verify th
 
 <!--BREAK-->
 
-#**Lab 6: Installation and Configuration of the MCollective client (Estimated time: xx minutes)**
+#**Lab 6: Installation and Configuration of the MCollective client (Estimated time: 10 minutes)**
 
 **Server used:**
 
@@ -609,7 +604,7 @@ Here, we have configured the MCollective client to connect to ActiveMQ running o
 
 <!--BREAK-->
 
-#**Lab 7: Installation and Configuration of the Broker Application (Estimated time: xx minutes)**
+#**Lab 7: Installation and Configuration of the Broker Application (Estimated time: 15 minutes)**
 
 **Server used:**
 
@@ -719,7 +714,7 @@ While you are in this file, you can change any other settings that need to be co
 
 <!--BREAK-->
 
-#**Lab 8: Configure the Broker plugins and MongoDB User Accounts (Estimated time: xx minutes)**
+#**Lab 8: Configure the Broker plugins and MongoDB User Accounts (Estimated time: 15 minutes)**
 
 **Server used:**
 
@@ -781,11 +776,12 @@ If you performed the above steps correctly, you should see output similar to thi
 	
 and
 	
-		3RH8tLp6fvX4RVV9ny2lm0tZpTjXhB62ieC6CN1Fh/2468Z1+6lX4wpCJ6sfYH6u2+//gbDDStDX+aPMtSiNFw==
+	3RH8tLp6fvX4RVV9ny2lm0tZpTjXhB62ieC6CN1Fh/2468Z1+6lX4wpCJ6sfYH6u2+//gbDDStDX+aPMtSiNFw==
 
 	
-Now that we have our variables setup correctly, we can create our *openshift-origin-dns-bind.conf* file.  Ensure that you are still in the */etc/openshift/plugins.d* directory and issue the following command:
+Now that we have our variables setup correctly, we can create our *openshift-origin-dns-bind.conf* file.  **Ensure that you are still in the */etc/openshift/plugins.d* directory** and issue the following command:
 
+	# cd /etc/openshift/plugins.d
 	# cat << EOF > openshift-origin-dns-bind.conf
 	BIND_SERVER="127.0.0.1"
 	BIND_PORT=53
@@ -883,7 +879,7 @@ This will ensure that the broker starts upon next system boot.  However, we also
 
 **Lab 8 Complete!**
 <!--BREAK-->
-#**Lab 9: Install the OpenShift Enterprise Web Console (Estimated time: xx minutes)**
+#**Lab 9: Install the OpenShift Enterprise Web Console (Estimated time: 10 minutes)**
 
 **Server used:**
 
@@ -896,7 +892,7 @@ This will ensure that the broker starts upon next system boot.  However, we also
 * service
 * chkconfig
 
-In this lab we want to install the OpenShift Enterprise Web Console.  The console is written in ruby and will provide a great way for users of the system to create and manage application gears that are deployed on the gear nodes.  
+In this lab we want to install the OpenShift Enterprise Web Console.  The console is written in ruby and will provide a great way for users of the system to create and manage application gears that are deployed on the gear hosts.  
 
 ##**Install the web console rpms**
 
@@ -904,9 +900,11 @@ The installation of the web console can be performed with a simple *yum install*
 
 	# yum install openshift-console
 	
+**Note:** Depending on your connection and speed of your broker host, this installation make take several minutes.
+	
 ##**Configure authentication for the console**
 
-In a previous lab, we configured the broker application for Basic Auth.  When performing that lab, you actually configured authentication for the REST based API that the broker application provides.  One of the great things about OpenShift Enterprise is that console application uses a separate authenticate scheme for authenticating users to the web console.  This will allow you to restrict which users you want to have access to the REST API and keep that authentication separate from the web based user console.
+In a previous lab, we configured the broker application for Basic Auth.  When performing that lab, you actually configured authentication for the REST based API that the broker application provides.  One of the great things about OpenShift Enterprise is that the console application uses a separate authenticate scheme for authenticating users to the web console.  This will allow you to restrict which users you want to have access to the REST API and keep that authentication separate from the web based user console.
 
 The openshift-console package that we installed previously in this lab created some sample authentication files for us.  These files are located in the */var/www/openshift/console/httpd/conf.d* directory.  For this lab, we are going to use the same htpasswd file that we created when setting up the Broker Application authentication.  In order to do this, simply issue the following commands:
 
@@ -925,7 +923,7 @@ Once completed, the console will now prompt the user to provide their login cred
 
 **Lab 9 Complete!**
 <!--BREAK-->
-#**Lab 10: Configure DNS resolution for node host (Estimated time: xx minutes)**
+#**Lab 10: Configure DNS resolution for node host (Estimated time: 20 minutes)**
 
 **Servers used:**
 
@@ -958,16 +956,18 @@ Once you have successfully subscribed to the correct products, ensure that your 
 OpenShift Enterprise requires NTP to synchronize the system and hardware clocks. This synchronization is necessary for communication between the broker and node hosts; if the clocks are too far out of synchronization, MCollective will drop messages.  Every MCollective request includes a time stamp, provided by the sending host's clock. If a sender's clock is substantially behind a recipient's clock, the recipient drops the message.  This is often referred to as clock skew as is a common problem that users encounter when they fail to sync all of the system clocks.
 
 	# ntpdate clock.redhat.com
+	# chkconfig ntpd on
+	# service ntpd start
 	
 ##**Configure broker application host**
 
-SSH to your broker application node that we configured in the previous labs and set a variable that points to your keyfile.  If you have been using example.com, as stated in this lab manual, the following command should work.
+**SSH to your broker application host** that we configured in the previous labs and set a variable that points to your keyfile.  If you have been using example.com, as stated in this lab manual, the following command should work.
 
 	# keyfile=/var/named/example.com.key
 
 If you did not use example.com, replace the above command with the correct location of your keyfile.
 
-In order to configure your DNS to resolve your node host, we need to tell our BIND server about the host.  Run the following command and replace the IP address with the correct ip address of your node.
+In order to configure your DNS to resolve your node host, we need to tell our BIND server about the host.  Run the following command and **replace the IP address with the correct ip address of your node**.
 
 	# oo-register-dns -h node -d example.com -n 10.10.10.11 -k ${keyfile}
 	
@@ -985,7 +985,7 @@ While on the broker application host, we need to copy the SSH key that we previo
 
 	# scp /etc/openshift/rsync_id_rsa.pub root@node.example.com:/root/.ssh
 	
-Once you enter that command, you will be prompted to authenticate to the node system.
+Once you enter that command, you will be prompted to authenticate to the node host.
 
 At this point, we need to login to our node host to add the newly copied key to our authorized_keys.  SSH into your node host and run the following:
 
@@ -1002,17 +1002,19 @@ Now that our key has been copied from our broker application host to our node ho
 
 ##**Configure node host for DNS resolution**
 
-We need to configure the node host to use the BIND server that we have installed and configured on the broker application server.  This is a fairly straight forward process by adding the IP address of the broker application host to our */etc/resolv.conf* on the node host.  Edit this file and the following line making sure to use the correct IP address of your broker application server.
+We need to configure the node host to use the BIND server that we have installed and configured on the broker application host.  This is a fairly straight forward process by adding the IP address of the broker application host to our */etc/resolv.conf* on the node host.  Edit this file and the following line making sure to use the correct IP address of your broker application server.
+
+**Note: Execute the following on the node host.**
 
 	nameserver 10.10.10.10
 
 ##**Configure nameserver placement and hostname**
 
-On the node host, we need to configure our settings to prepend the DNS server we created in a previous lab to our resolve.conf file on system boot.  This will allow the node host to resolve references to broker.example.com to ensure that all pieces of OpenShift Enterprise can communicate with one another.  This process is similar to setting up the *dhclient-eht0.conf* configuration file for the broker application.  
+On the node host, we need to configure our settings to prepend the DNS server we created in a previous lab to our resolv.conf file on system boot.  This will allow the node host to resolve references to broker.example.com to ensure that all pieces of OpenShift Enterprise can communicate with one another.  This process is similar to setting up the *dhclient-eht0.conf* configuration file for the broker application.  
 
 **Note:** This step assumes that your node host is using the eth0 device for network connectivity.  If that is not the case, replace eth0 with the correct ethernet device for you host.
 
-Edit the */etc/dhcp/dhclient-eth0.conf file, or add it if it doesn’t exist, and add the following information ensuring that you replace the IP address with the correct IP of your broker application host.
+Edit the */etc/dhcp/dhclient-eth0.conf* file, or add it if it doesn’t exist, and add the following information ensuring that you replace the IP address with the correct IP of your broker application host.
 
 	prepend domain-name-servers 10.10.10.10;
 	supersede host-name "node";
@@ -1034,7 +1036,7 @@ Verify that the hostname was set correctly by running the hostname command.  If 
 **Lab 10 Complete!**
 <!--BREAK-->
 
-#**Lab 11: Setting up MCollective on the node host (Estimated time: xx minutes)**
+#**Lab 11: Setting up MCollective on the node host (Estimated time: 10 minutes)**
 
 **Server used:**
 
@@ -1055,6 +1057,8 @@ If you recall, MCollective is the tool that OpenShift Enterprise uses to send an
 In order to install MCollective on the node host, we will need to install the *openshift-origin-msg-node-mcollective* package that is provided with your OpenShift Enterprise subscription.
 
 	# yum install openshift-origin-msg-node-mcollective
+	
+**Note:** Depending on your connection and speed of your broker host, this installation make take several minutes.
 
 ##**Configure MCollective on node host**
 
@@ -1102,7 +1106,7 @@ If MCollective was installed and configured correctly, you should see node.examp
 
 **Lab 11 Complete!**
 <!--BREAK-->
-#**Lab 12: Installation and configuration of core OpenShift Enterprise node packages (Estimated time: xx minutes)**
+#**Lab 12: Installation and configuration of core OpenShift Enterprise node packages (Estimated time: 10 minutes)**
 
 **Server used:**
 
@@ -1129,6 +1133,8 @@ The following packages are required for your node host to work correctly:
 Installing these packages can be performed in one yum install command.
 
 	# yum install rubygem-openshift-origin-node rubygem-passenger-native openshift-origin-port-proxy openshift-origin-node-util
+	
+**Note:** Depending on your connection and speed of your broker host, this installation make take several minutes.
 
 ##**Install cartridges that the node host will support**
 
@@ -1162,7 +1168,7 @@ Let’s start by installing the cron package, which is required for all OpenShif
 
 	# yum install openshift-origin-cartridge-cron-1.4
 	
-For this lab, let’s also assume that we want to only allow scaleable PHP applications that can connect to MySQL on our OpenShift Enterprise deployment.  Issue the following command to installed the required cartridges:
+For this lab, let’s also assume that we want to only allow scalable PHP applications that can connect to MySQL on our OpenShift Enterprise deployment.  Issue the following command to installed the required cartridges:
 
 	# yum install openshift-origin-cartridge-haproxy-1.4 openshift-origin-cartridge-php-5.3 openshift-origin-cartridge-mysql-5.1
 
@@ -1185,7 +1191,7 @@ The node host will need to allow http, https, and ssh traffic to flow through th
 
 **Lab 12 Complete!**
 <!--BREAK-->
-#**Lab 13: Configure PAM namespace, linux control groups (cgroups), and user quotas (Estimated time: xx minutes)**
+#**Lab 13: Configure PAM namespace, linux control groups (cgroups), and user quotas (Estimated time: 10 minutes)**
 
 **Server used:**
 
@@ -1282,7 +1288,7 @@ And then generate user quota info for the mount point:
 
 **Lab 13 Complete!**
 <!--BREAK-->
-#**Lab 14: Configure SELinux and System Control Settings (Estimated time: xx minutes)**
+#**Lab 14: Configure SELinux and System Control Settings (Estimated time: 5 minutes)**
 
 **Server used:**
 
@@ -1337,7 +1343,7 @@ Once the changes have been made, we need to reload the configuration file.
 
 **Lab 14 Complete!**
 <!--BREAK-->
-#**Lab 15: Configure SSH, OpenShift Port Proxy, and node configuration (Estimated time: xx minutes)**
+#**Lab 15: Configure SSH, OpenShift Port Proxy, and node configuration (Estimated time: 20 minutes)**
 
 **Server used:**
 
@@ -1395,9 +1401,419 @@ Facter generates metadata files for MCollective and is normally run by cron. Run
 
 In order to verify that all services were installed and configured correctly, I suggest that you restart the node to ensure that all services start on boot as described in this post.
 
+##**Test the configuration**
+
+If everything in the current, and all previous labs were completed successfully, we can now test our deployment of OpenShift Enterprise.  During this lab, we will setup an SSH tunnel to allow us to communicate with the broker and node hosts.  The will allow us to connect to localhost on our lab machine and all traffic will be forwarded to your OpenShift Enterprise installation.  In the next lab, we will update our local machines to point directly to the DNS server that we installed in lab 2, but for now, an SSH tunnel will allow us to test the installation.
+
+On your local machine, issue the following command, replacing the IP address with the IP address of your broker node:
+
+	# sudo ssh -f -N -L 80:broker.example.com:80 -L 8161:broker.example.com:8161 -L 443:broker.example.com:443 root@10.4.59.x
+	
+We have to use the sudo command in order to allow forwarding of low range ports.  Once, you have entered the above command, and authenticated correctly, you should be able to view the web console by pointing your local browser to:
+
+	http://127.0.0.1
+	
+You will notice that you may, depending on your browser settings, have to accept the SSL certificate.  In Firefox, the page will look similar to this:
+
+![](http://training.runcloudrun.com/images/cert.png)
+
+Once you have accepted and added the SSL certificate, you will prompted to authenticate to the OpenShift console.  Use the credentials that we created in a previous lab, which should be:
+
+* Username: demo
+* Password: demo
+
+After you have authenticated, you should be presented with the OpenShift web console as shown below:
+
+![](http://training.runcloudrun.com/images/console.png)
+
+If you do not see the expected content, consult the troubleshooting section at the end of this manual.
+
 **Lab 15 Complete!**
 <!--BREAK-->
-#**Appendix A - Installation of Red Hat Enterprise Linux**
+#**Lab 16: Configure local machine for DNS resolution (Estimated time: 10 minutes)**
+
+**Server used:**
+
+* local machine
+
+**Tools used:**
+
+* text editor
+* networking tools
+
+At this point, we should have a complete OpenShift Enterprise installation working correctly on the lab machines that were provided to you by the instructor.  During the next portion of the training, we will be focussing on administration and usage of the OpenShift PaaS.  To make performing these tasks easier, it is suggested that you add the DNS server that we created in lab 2 to be the first nameserver that your local machine uses to resolve hostnames.  The process for this varies depending on  operating system.  We will cover the configuration for both the Linux and Mac Operating systems.  If you are using a Microsoft Windows machine, consult the instructor for instructions on how to perform this lab.
+
+##**Configure example.com resolution for Linux**
+
+If you are using Linux, the process for updating DNS is straightforward.  Simple edit the */etc/resolv.conf* configuration file and add the IP address of you broker node as the first entry.  For example, add the following at the top of the file, replacing the 10.x.x.x IP address with the correct one from your broker node.
+
+	nameserver 10.4.59.x
+	
+Once you have added the above nameserver, you should be able to communicate with your OpenShift Enterprise PaaS by using the hostnames.  To test this out, ping the broker and node hosts from your local machine:
+
+	$ ping broker.example.com
+	$ ping node.example.com
+	
+##**Configure example.com resolution for OSX**
+	
+If you are using OSX, you will notice that the operating does indeed have a */etc/rsolv.conf* configuration file.  However, the operating system does not respect this file and requires users to edit the DNS servers via the *System Preferences* tool.
+
+Open up the *System Preferences* tool and select the *Network* utility:
+
+![](http://training.runcloudrun.com/images/network.png)
+
+In the bottom left hand corner of the *Network* utility, ensure that the lock is unlocked so that you can make changes to the configuration.  Once you have unlocked the system for changes, located the ethernet device that is providing connectivity for your machine and click the advanced button:
+
+![](http://training.runcloudrun.com/images/network2.png)
+
+Select the DNS tab at the top of the window:
+
+![](http://training.runcloudrun.com/images/network3.png)
+
+**Note: Make a list of the current DNS servers that you have for your configuration.  When you add a new one, OSX removes the existing servers forcing you to add them back.**
+
+Click the *+* button to add a new DNS server and enter the 10.4.59.x IP address of your broker host.
+
+![](http://training.runcloudrun.com/images/network4.png)
+
+**Note: Add your existing nameservers back that you made a note of above.**
+
+**Note: After this training class, remember to remove the DNS server for your broker host.**
+
+After you have applied the changes, we can now test that name resolution is working correctly.  To test this out, ping the broker and node hosts from your local machine:
+
+	$ ping broker.example.com
+	$ ping node.example.com
+
+**Lab 16 Complete!**
+<!--BREAK-->
+#**Lab 17: Adding cartridges (Estimated time: 10 minutes)**
+
+**Server used:**
+
+* node host
+* broker host
+
+**Tools used:**
+
+* yum
+* bundle
+
+In production mode, Rails caches certain values for faster retrieval. Clearing this cache allows the retrieval of updated values.
+
+For example, the first time MCollective retrieves the list of cartridges available on your nodes, the list is cached so that subsequent requests for this information are processed more quickly. If you install a new cartridge, it is unavailable to users until the cache is cleared and MCollective retrieves a new list of cartridges. This lab will focus on installing cartridges to allow OpenShift Enterprise to create JBoss gears.
+
+##**List available cartridges for your subscription**
+
+For a complete list of all cartridges that you are entitled to install,  you can perform a search using the yum command that will output all OpenShift Enterprise cartridges.
+
+	# yum search origin-cartridge
+
+During this lab, you should see the following cartridges available to install:
+
+* openshift-origin-cartridge-abstract.noarch : OpenShift common cartridge components
+* openshift-origin-cartridge-cron-1.4.noarch : Embedded cron support for express
+* openshift-origin-cartridge-diy-0.1.noarch : Provides diy support
+* openshift-origin-cartridge-haproxy-1.4.noarch : Provides embedded haproxy-1.4 support
+* openshift-origin-cartridge-jbosseap-6.0.noarch : Provides JBossEAP6.0 support
+* openshift-origin-cartridge-jbossews-1.0.noarch : Provides JBossEWS1.0 support
+* openshift-origin-cartridge-jenkins-1.4.noarch : Provides jenkins-1.4 support
+* openshift-origin-cartridge-jenkins-client-1.4.noarch : Embedded jenkins client support for express
+* openshift-origin-cartridge-mysql-5.1.noarch : Provides embedded mysql support
+* openshift-origin-cartridge-perl-5.10.noarch : Provides mod_perl support
+* openshift-origin-cartridge-php-5.3.noarch : Provides php-5.3 support
+* openshift-origin-cartridge-postgresql-8.4.noarch : Provides embedded PostgreSQL support
+* openshift-origin-cartridge-python-2.6.noarch : Provides python-2.6 support
+* openshift-origin-cartridge-ruby-1.8.noarch : Provides ruby rack support running on Phusion Passenger
+* openshift-origin-cartridge-ruby-1.9-scl.noarch : Provides ruby rack support running on Phusion Passenger
+
+
+##**Install JBoss support**
+
+In order to enable consumers of the PaaS to be able to create JBoss gears, we will need to install all the necessary cartridges for the application server and supporting build systems.  Perform the following command to install the required cartridges:
+
+**Note: Execute the following on the node host.**
+
+	# yum install openshift-origin-cartridge-jbosseap-6.0.noarch openshift-origin-cartridge-jbossews-1.0.noarch openshift-origin-cartridge-jenkins–1.4.noarch openshift-origin-cartridge-jenkins-client–1.4.noarch
+	
+The above command will allow users to create JBoss EAP and JBoss EWS gears.  We also installed support for the Jenkins continuous integration environment which we will cover in a later lab.  At the time of this writing, the above command will download and install an additional 285 packages on your node host.
+
+**Note:** Depending on your connection and speed of your node host, this installation make take several minutes.  
+
+##**Clear broker application cache**
+
+At this point, you will notice that if you try to create a JBoss based application via the web console, that the application type is not available.  This is because the broker host creates a cache of available gear types to increase performance.  After adding a new cartridge, you need to clear this cache in order for the new gear type to be available to users.
+
+**Note: Execute the following on the broker host.**
+
+	# cd /var/www/openshift/broker
+	# bundle exec rake tmp:clear
+	
+The cache can take several minutes to clear before you see the new cartridges available via the web console.
+
+##**Test the new cartridge**
+
+Given the steps in lab 16 during part 1 of this training, you should be able to access the web console from a web browser on your local machine.  Open up your preferred browser and enter the following URL:
+
+	http://broker.example.com
+	
+You will be prompted to authenticate, if you haven’t already and then be presented with an application creation screen.  After the cache has been cleared, and assuming you have added the new cartridges correctly, you should see a screen similar to the following:
+
+![](http://training.runcloudrun.com/images/console-jboss.png)
+
+If you do not see the new cartridges available on the web console, check that the new cartridges are avialable by checking the contents of the */usr/libexec/openshift/cartridges* directory:
+
+	# cd /usr/libexec/openshift/cartridges
+	# ls
+	
+##**Install PostgreSQL and DIY cartridges**
+
+Using the knowledge that you have learned in this lab, perform the necessary command to install both the PostgreSQL and DIY cartridges on your node host.  Verify the success of the installation by ensuring that the DIY application type is available via the web console:
+
+![](http://training.runcloudrun.com/images/console-diy.png)
+
+
+**Lab 17 Complete!**
+<!--BREAK-->
+#**Lab 18: Managing Resources (Estimated time: 10 minutes)**
+
+**Server used:**
+
+* node host
+* broker host
+
+**Tools used:**
+
+* text editor
+* oo-admin-ctl-user
+
+##**Setting default gear quotas and sizes**
+
+A users default gear size and quota is specified in the */etc/openshift/broker.conf* configuration file located on the broker host.  The *VALID_GEAR_SIZES* setting is not applied to users but specifies the gear sizes that the current OpenShift Enterprise PaaS installation supports.  The *DEFAULT_MAX_GEARS* settings specifies the number of gears to assign to all users upon user creation.  This is the total number of gears that a user can create by default.  The *DEFAULT_GEAR_SIZE* setting is the size of gear that a newly created user has access to.
+
+Take a look at the   */etc/openshift/broker.conf* configuration file to determine the current settings for your installation:
+
+**Note: Execute the following on the broker host.**
+
+	# cat /etc/openshift/broker.conf
+
+By default, OpenShift Enterprise sets the default gear size to small and the number of gears a user can create to 100.  
+
+When changing the */etc/openshift/broker.conf* configuration file, keep in mind that the existing settings are cached until you restart the *openshift-broker* service.
+
+##**Setting the number of gears a specific user can create**
+
+There are often times when you want to increase or decrease the number of gears a particular users to consume without modifying the setting that is applied to all users.  OpenShift Enterprise provides a command that will provide the functionality to set per user settings.  To see all of the available options that can be performed on a specific user, enter the following command:
+
+	# oo-admin-ctl-user
+	
+To see how many gears that our *demo* has consumed as well as how many the *demo* user has access to create, you can provide the following switches to the *oo-admin-ctl-user* command:
+
+	# oo-admin-ctl-user -l demo
+	
+Given our current configuration for this training class, you should see the following output:
+	
+	User demo:
+      	consumed gears: 0
+        max gears: 100
+        gear sizes: small
+        
+In order to change the number of gears that our *demo* has permission to create, you can pass a --setmaxgears switch to the command.  For instance, if we only want to allow the *demo* to be able to create 25 gear, we would use the following command:
+
+	# oo-admin-ctl-user -l demo --setmaxgears 25
+	
+After entering the above command, you should see the following output:
+
+	Setting max_gears to 25... Done.
+	User demo:
+      consumed gears: 0
+      max gears: 25
+      gear sizes: small
+      
+##**Setting the type of gears a specific user can create**
+
+In a production environment, a customer will typically have different sizes of gear types that are available for a user to consume.  For this lab, we will only create small gears.  However, to add the ability to create medium size gears to the *demo* user, you can pass the -addgearsize to the *oo-admin-ctl-user* command.  
+
+	# oo-admin-ctl-user -l demo --addgearsize medium
+
+After entering the above command, you should see the following output:
+
+	Adding gear size medium for user demo... Done.
+	User demo:
+      consumed gears: 0
+      max gears: 25
+      gear sizes: small, medium
+      
+In order to remove the ability for a user to create a specific gear size, you can use the --removegearsize parameter:
+
+	# oo-admin-ctl-user -l demo --removegearsize medium
+	
+	
+**Lab 18 Complete!**
+<!--BREAK-->
+
+#**Lab 19: Managing Districts (Estimated time: 10 minutes)**
+
+**Server used:**
+
+* node host
+* broker host
+
+**Tools used:**
+
+* text editor
+* oo-admin-ctl-district
+
+Districts define a set of node hosts within which gears can be easily moved to load-balance the resource usage of those nodes. While not required for a basic OpenShift Enterprise installation, districts provide several administrative benefits and their use is recommended.
+
+Districts allow a gear to maintain the same UUID (and related IP addresses, MCS levels and ports) across any node within the district, so that applications continue to function normally when moved between nodes on the same district. All nodes within a district have the same profile, meaning that all the gears on those nodes are the same size (for example small or medium). There is a hard limit of 6000 gears per district.
+
+This means, for example, that developers who hard-code environment settings into their applications instead of using environment variables will not experience problems due to gear migrations between nodes. The application continues to function normally because exactly the same environment is reserved for the gear on every node in the district. This saves developers and administrators time and effort. 
+
+##**Enable districts**
+
+To use districts, the broker MCollective plugin must be configured to enable districts as it is responsible for communicating with node hosts regarding gears.  Edit the */etc/openshift/plugins.d/openshift-origin-msg-broker-mcollective.conf* configuration file and confirm the following parameters are set:
+
+**Note: Execute the following on the broker host.**
+
+	DISTRICTS_ENABLED=true
+	NODE_PROFILE_ENABLED=true
+
+##**Creating and populating districts**
+
+To create a district that will support a gear type of small, we will use the *oo-admin-ctl-district* command.  After defining the district, we can add our node host (node.example.com) as the only node in that district.  Execute the following commands to create a district named small_district that can hold *small* gear types:
+
+**Note: Execute the following on the broker host.**
+
+	# oo-admin-ctl-district -c create -n small_district -p small
+	
+If the command was successful, you should see output similar to the following:
+
+	Successfully created district: 513b50508f9f44aeb90090f19d2fd940
+	
+	{"name"=>"small_district",
+	 "externally_reserved_uids_size"=>0,
+	 "active_server_identities_size"=>0,
+	 "node_profile"=>"small",
+	 "max_uid"=>6999,
+	 "creation_time"=>"2013-01-15T17:18:28-05:00",
+	 "max_capacity"=>6000,
+	 "server_identities"=>{},
+	 "uuid"=>"513b50508f9f44aeb90090f19d2fd940",
+	 "available_uids"=>"<6000 uids hidden>",
+	 "available_capacity"=>6000}
+
+If you are familiar with JSON, you will understand the format of this output.  What actually happened is a new document was created in the MongoDB NoSQL Database that we installed in a previous lab.  To view this document inside of the database, execute the following:
+
+	# mongo
+
+This will drop you into the mongo shell where we can perform command against the database.  The first thing we need to do is let MongoDB know which database we want to use:
+
+	> show dbs
+	> use openshift_broker_dev
+	
+To list all of the available collections in the *openshift_broker_dev* database, you can issue the following:
+ 
+	> db.getCollectionNames()
+	
+You should see the following collections returned:
+
+	[ "district", "system.indexes", "system.users", "user" ]
+	
+We can now query the *district* collection to verify the creation:
+
+	> db.district.find()
+	
+The output should be:
+
+	{ "_id" : "513b50508f9f44aeb90090f19d2fd940", "name" : "small_district", "externally_reserved_uids_size" : 0, 
+	"active_server_identities_size" : 0, "node_profile" : "small", "max_uid" : 6999, "creation_time" : 
+	"2013-01-15T17:18:28-05:00", "max_capacity" : 6000, "server_identities" : [ ], "uuid" : 
+	"513b50508f9f44aeb90090f19d2fd940", "available_uids" : [ 	1000, .........], , "available_capacity" : 6000 }
+
+**Note: The *server_identities* array does not contain any data yet.**
+
+Now we can add our node host, node.example.com, to the *small_district* that we created above:
+
+	# oo-admin-ctl-district -c add-node -n small_district -i node.example.com
+	
+You should see the following output:
+
+	Success!
+	
+	{"available_capacity"=>6000,
+	 "creation_time"=>"2013-01-15T17:18:28-05:00",
+	 "available_uids"=>"<6000 uids hidden>",
+	 "node_profile"=>"small",
+	 "uuid"=>"513b50508f9f44aeb90090f19d2fd940",
+	 "externally_reserved_uids_size"=>0,
+	 "server_identities"=>{"node.example.com"=>{"active"=>true}},
+	 "name"=>"small_district",
+	 "max_capacity"=>6000,
+	 "max_uid"=>6999,
+	 "active_server_identities_size"=>1}
+	 
+Repeat the steps above to query the database for information about districts.  Notice that the *server_identities* now contains the following information:
+
+	"server_identities" : [ { "name" : "node.example.com", "active" : true } ]
+	
+If you continued to add additional nodes to this district, the *server_identities* array would show all the node hosts that are assigned to this district.
+
+OpenShift Enterprise always provides a command line tool to display information about a district.  Simple enter the following command to view the JSON information that is stored in the MongoDB database:
+
+	# oo-admin-ctl-district
+
+##**Manage district capacity**
+
+Districts and node hosts both have a configured capacity for gears. For a node host, the default values configured in */etc/openshift/resource_limits.conf*  are: 
+
+* Maximum number of application per node : 100
+* Maximum number of active applications per node : 100	
+	 
+**Lab 19 Complete!**
+
+<!--BREAK-->
+#**Appendix A - Troubleshooting**
+
+##**Diagnostics script**
+
+Installing and configuring an OpenShift Enterprise PaaS can often fail due to simple mistakes in configuration files.  Fortunately,  the team provides an unsupported troubleshooting script that can diagnose most problems with an installation.  This script is located on the lab support website and is called *oo-diagnostics*.  For this lab, running the version provided on the support website should suit your needs but when helping customers out, I suggest you pull the script from the official github repository to ensure that you have most updated version.  The github script can is located at:
+
+	https://raw.github.com/openshift/origin-server/master/util/oo-diagnostics
+	
+This script can be run on any OpenShift Enterprise broker or node host.  Once you have the script downloaded, change the permission to enable execution of the script:
+
+	# chmod +x oo-diagnostics
+	
+To run the command and check for errors, issue the following command:
+
+	# ./oo-diagnostics -v
+	
+**Note:** Sometimes the script will fail at the first error and not continue processing.  In order to run a full check on your node, add the *--abortok* switch
+	
+	# ./oo-diagnostics -v --abortok
+	
+Under the covers, this script performs a lot of checks on your host as well as executing the existing *oo-accept-broker* and *oo-accept-node* commands on the respective host.
+
+##**Recovering failed nodes**
+
+A node host that fails catastrophically can be recovered if the gear directory /var/lib/openshift has been stored in a fault-tolerant way and can be recovered. In practice this scenario occurs rarely, especially when node hosts are virtual machines in a fault tolerant infrastructure rather than physical machines. 
+
+**Note: Do not start the MCollective service until you have completed the following steps.**
+
+Install a node host with the same hostname and IP address as the one that failed. The hostname DNS A record can be adjusted if the IP address must be different, but note that the application CNAME and database records all point to the hostname, and cannot be easily changed.
+
+Duplicate the old node host's configuration on the new node host, ensuring in particular that the gear profile is the same. 
+
+Mount */var/lib/openshift* from the original, failed node host. SELinux contexts must have been stored on the */var/lib/openshift* volume and should be maintained. 
+
+Recreate /etc/passwd entries for all the gears using the following steps:
+
+* Get the list of UUIDs from the directories in /var/lib/openshift.
+* Get the Unix UID and GID values from the group value of /var/lib/openshift/UUID.
+* Create the corresponding entries in /etc/passwd, using another node's /etc/passwd file for reference. 
+
+Reboot the new node host to activate all changes, start the gears, and allow MCollective and other services to run. 
 
 <!--BREAK-->
 
