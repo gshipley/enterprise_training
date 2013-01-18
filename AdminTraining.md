@@ -1327,7 +1327,7 @@ To set these values and then relabel files to the correct context,  issue the fo
 
 ##**Configure System Control Settings**
 
-We need to modify the */etc/sysctl.conf* configuration file to increase the number of kernel semaphores (allows many httpds processes), increase the number ephemeral ports, and to also increase the connection tracking table size.  Edit the file in your favorite text editor and add the following lines to the bottom of the file:
+We need to modify the */etc/sysctl.conf* configuration file to increase the number of kernel semaphores (to allow many httpd processes), increase the number ephemeral ports, and to also increase the connection tracking table size.  Edit the file in your favorite text editor and add the following lines to the bottom of the file:
 
 	# Added for OpenShift Enterprise
 	kernel.sem = 250  32000 32  4096
