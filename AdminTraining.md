@@ -1321,10 +1321,7 @@ The OpenShift Enterprise node requires several SELinux boolean values to be set 
 To set these values and then relabel files to the correct context,  issue the following commands:
 
 	# setsebool -P httpd_unified=on httpd_can_network_connect=on httpd_can_network_relay=on httpd_read_user_content=on httpd_enable_homedirs=on httpd_run_stickshift=on allow_polyinstantiation=on
-	# fixfiles -R rubygem-passenger restore
-	# fixfiles -R mod_passenger restore
 	# restorecon -rv /var/run
-	# restorecon -rv /usr/share/rubygems/gems/passenger-*
 	# restorecon -rv /usr/sbin/mcollectived /var/log/mcollective.log /var/run/mcollectived.pid
 	# restorecon -rv /var/lib/openshift /etc/openshift/node.conf /etc/httpd/conf.d/openshift
 
