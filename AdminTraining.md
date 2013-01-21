@@ -1376,13 +1376,13 @@ Multiple application gears can and will reside on the same node host.  In order 
 	# chkconfig openshift-port-proxy on
 	# service openshift-port-proxy start
 	
-If a node is restarted, we want to ensure that the gear applications are also restarted.  OpenShift Enterprise provides a script to accomplish this task but we need to configure the service to start on boot.
+If a node is restarted, we want to ensure that the gear applications are also restarted.  OpenShift Enterprise provides a script to accomplish this task, but we need to configure the service to start on boot.
 
 	# chkconfig openshift-gears on
 	
 ##**Configure node settings for domain name**
 
-Edit the */etc/openshift/node.conf* file and specify the correct settings for your *CLOUD_DOMAIN, PUBLIC_HOSTNAME, AND BROKER_HOST* IP address.  For example, given the information in this lab, my settings are as follows:
+Edit the */etc/openshift/node.conf* file and specify the correct settings for your *CLOUD_DOMAIN, PUBLIC_HOSTNAME, and BROKER_HOST* IP address.  For example, given the information in this lab, my settings are as follows:
 
 	PUBLIC_HOSTNAME="node.example.com"       # The node host's public hostname
 	PUBLIC_IP=“10.10.10.10”                                      # The node host's public IP address
@@ -1400,7 +1400,7 @@ In order to verify that all services were installed and configured correctly, I 
 
 ##**Test the configuration**
 
-If everything in the current, and all previous labs were completed successfully, we can now test our deployment of OpenShift Enterprise.  During this lab, we will setup an SSH tunnel to allow us to communicate with the broker and node hosts.  The will allow us to connect to localhost on our lab machine and all traffic will be forwarded to your OpenShift Enterprise installation.  In the next lab, we will update our local machines to point directly to the DNS server that we installed in lab 2, but for now, an SSH tunnel will allow us to test the installation.
+If everything in the current, and all previous labs were completed successfully, we can now test our deployment of OpenShift Enterprise.  During this lab, we will setup an SSH tunnel to allow us to communicate with the broker and node hosts.  The will allow us to connect to localhost on our lab machine and all traffic will be forwarded to your OpenShift Enterprise installation.  In the next lab, we will update our local machines to point directly to the DNS server that we installed in Lab 2, but for now, an SSH tunnel will allow us to test the installation.
 
 On your local machine, issue the following command, replacing the IP address with the IP address of your broker node:
 
@@ -1438,7 +1438,7 @@ If you do not see the expected content, consult the troubleshooting section at t
 * text editor
 * networking tools
 
-At this point, we should have a complete OpenShift Enterprise installation working correctly on the lab machines that were provided to you by the instructor.  During the next portion of the training, we will be focussing on administration and usage of the OpenShift PaaS.  To make performing these tasks easier, it is suggested that you add the DNS server that we created in lab 2 to be the first nameserver that your local machine uses to resolve hostnames.  The process for this varies depending on  operating system.  We will cover the configuration for both the Linux and Mac Operating systems.  If you are using a Microsoft Windows machine, consult the instructor for instructions on how to perform this lab.
+At this point, we should have a complete OpenShift Enterprise installation working correctly on the lab machines that were provided to you by the instructor.  During the next portion of the training, we will be focussing on administration and usage of the OpenShift PaaS.  To make performing these tasks easier, it is suggested that you add the DNS server that we created in Lab 2 to be the first nameserver that your local machine uses to resolve hostnames.  The process for this varies depending on  operating system.  We will cover the configuration for both the Linux and Mac Operating systems.  If you are using a Microsoft Windows machine, consult the instructor for instructions on how to perform this lab.
 
 ##**Configure example.com resolution for Linux**
 
@@ -1550,7 +1550,7 @@ The cache can take several minutes to clear before you see the new cartridges av
 
 ##**Test the new cartridge**
 
-Given the steps in lab 16 during part 1 of this training, you should be able to access the web console from a web browser on your local machine.  Open up your preferred browser and enter the following URL:
+Given the steps in Lab 16 during Part 1 of this training, you should be able to access the web console from a web browser on your local machine.  Open up your preferred browser and enter the following URL:
 
 	http://broker.example.com
 	
