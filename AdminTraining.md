@@ -3452,7 +3452,7 @@ Before exposing a RESTful web service for the Todo entity, we need to enable JAX
 	import javax.ws.rs.ApplicationPath;
 	import javax.ws.rs.core.Application;
 	
-	@ApplicationPath("/")
+	@ApplicationPath(“/rest”)
 	public class JaxRsActivator extends Application {
 	   /* class body intentionally left blank */
 	}
@@ -3517,11 +3517,11 @@ Once you run the *git push* command, the application will begin building on the 
 
 In order to test out the RESTful web service that we created in this lab, we can add and retrieve todo items using the *curl* command line utility.  To add a new item, enter the following command:
 
-	$ curl -k -i -X POST -H "Content-Type: application/json" -d '{"todo":"Sell a lot of OpenShift Enterprise","tags":["javascript","ui"]}' https://todo-ose.example.com/todos
+	$ curl -k -i -X POST -H "Content-Type: application/json" -d '{"todo":"Sell a lot of OpenShift Enterprise","tags":["javascript","ui"]}' https://todo-ose.example.com/rest/todos
 	
 To list all available todo items, run the following command:
 
-	$ curl -k -i -H "Accept: application/json" https://todo-ose.example.com/todos/1
+	$ curl -k -i -H "Accept: application/json" https://todo-ose.example.com/rest/todos/1
 	
 You should see the following output:
 
@@ -3534,6 +3534,11 @@ You should see the following output:
 	
 	{"id":1,"todo":"Sell a lot of OpenShift Enterprise","tags":["javascript","ui"],"createdOn":1359086546955}
 	
+If you downloaded and deployed the source code from the git repository, the project contains a UI component which will allow you to test the application using your web browser.  Simply point your browser to
+
+	http://todo-ose.example.com
+	
+to verify that the application was deployed correctly.
 
 ##**Extra Credit**
 
@@ -3542,8 +3547,438 @@ SSH into the application gear and verify the todo item was added to the PostgreS
 
 **Lab 28 Complete!**
 <!--BREAK-->
+#**Lab 29:  Using Jenkins continuous integration (Estimated time: 30 minutes)**
 
-#**Lab XX: Using quickstarts (Estimated time: 10 minutes)**
+**Server used:**
+
+* localhost
+* node host
+
+**Tools used:**
+
+* rhc
+* git
+* yum
+
+Jenkins (https://wiki.jenkins-ci.org) is a full featured continuous integration (CI) server that can run builds, tests, and other scheduled tasks.  OpenShift Enterprise allows you to integrate Jenkins with your OpenShift Enterprise applications.
+
+With Jenkins, you have access to a full library of plugins (https://wiki.jenkins-ci.org/display/JENKINS/Plugins) and a vibrant, thriving community of users who have discovered a new way to do development. The basic work flow is:
+
+There are many reason why you would want to leverage Jenkins as a continuous integration server.  In the context of OpenShift Enterprise, some of the benefits are:
+
+* Archived Build information
+* No application downtime during the build process
+* Failed builds do not get deployed (leaving the previous working version in place)
+* More resources to build your application as each Jenkins build spins up a new gear for short lived period of time
+
+Jenkins includes a feature-rich web user interface that provides the ability to trigger builds, customize builds, manage resources, manage plugins, and many other features. 
+
+##**Verify Jenkins cartridges are installed**
+
+SSH to your node host and verify that you have the Jenkins cartridges installed:
+
+	# rpm -qa |grep jenkins
+	
+You should see the following four packages installed:
+
+* openshift-origin-cartridge-jenkins-1.4-1.0.1-1.el6op.noarch
+* jenkins-1.488-2.el6op.noarch
+* openshift-origin-cartridge-jenkins-client-1.4-1.0.1-1.el6op.noarch
+* jenkins-plugin-openshift-0.6.5-0.el6op.x86_64
+
+If you do now have the above RPM packages installed on your node host, follow the directions in lab 17 to install the Jenkins packages.  Make sure to clear the cache on the broker host after installing the new packages.
+
+##**Create Jenkins gear**
+
+In order to use Jenkins on OpenShift Enterprise, you will need to create an application gear to contain the Jenkins application.  This is done using the *rhc app create* command line tool, or you can use the web console to create the application.  The syntax for using the command line tool is as follows:
+
+	$ rhc app create -a jenkins -t jenkins
+	
+You should see the following output from this command:
+
+	Creating application 'jenkins'
+	==============================
+	
+	  Gear Size: default
+	  Scaling:   no
+	  Cartridge: jenkins
+	  Namespace: ose
+	
+	Your application's domain name is being propagated worldwide (this might take a minute)...
+	
+	Cloning into 'jenkins'...
+	done
+	
+	jenkins @ http://jenkins-ose.example.com/
+	=========================================
+	  Application Info
+	  ================
+	    SSH URL   = ssh://4437d81168c94baf9268f0592bbe31a9@jenkins-ose.example.com
+	    Git URL   =
+	ssh://4437d81168c94baf9268f0592bbe31a9@jenkins-ose.example.com/~/git/jenkins.git/
+	    UUID      = 4437d81168c94baf9268f0592bbe31a9
+	    Gear Size = small
+	    Created   = 2:05 PM
+	  Cartridges
+	  ==========
+	    jenkins-1.4
+	
+	RESULT:
+	Application jenkins was created.
+	
+	Jenkins created successfully.  Please make note of these credentials:
+	
+	   User: admin
+	   Password: QKVn_1ZlQ7T_
+	
+	Note:  You can change your password at: https://jenkins-ose.example.com/me/configure
+
+Make a note of the user username and password that was created for you by OpenShift Enteprise.
+
+##**Adding Jenkins support to your application**
+
+Now that we a Jenkins server setup and running, we can add support to our *todo* application that will allow all futures builds to happen on the Jenkins server.  To embed the Jenkins support cartridge in your application, use the following command:
+
+	$ rhc cartridge add -a todo -c jenkins-client
+
+The output should be the following:
+
+	Adding 'jenkins-client-1.4' to application 'todo'
+	Success
+	jenkins-client-1.4
+	==================
+	  Properties
+	  ==========
+	    Job URL = https://jenkins-ose.example.com/job/todo-build/
+
+Verify that the Jenkins client was added to your application by running the following command:
+
+	$ rhc app show todo
+	
+At the bottom of the output, you should see the following information:
+
+	  Cartridges
+	  ==========
+	    jenkins-client-1.4 = https://jenkins-ose.example.com/job/todo-build/
+	    postgresql-8.4     = postgresql://127.1.248.129:5432/
+	    jbosseap-6.0
+	    
+##**Configuring Jenkins**
+
+Open up a web browser and point to the following URL:
+
+	https://jenkins-ose.example.com/job/todo-build/
+	
+Authenticate to the Jenkins environment by providing the username and password that was displayed after adding the Jenkins application.
+
+![](http://training.runcloudrun.com/images/jenkins.png)
+
+Once you are authenticated to the Jenkins dashboard, click on the configure link:
+
+![](http://training.runcloudrun.com/images/jenkins2.png)
+
+A few interesting configuration items exist that may come in handy in the future:
+
+**Builder Configuration**: The first interesting configuration is about the builder as shown below. The configuration below states that Jenkins should create a builder with a small size using the JBoss EAP cartridge and the Jenkins master will wait for 5 minutes for the slave to come online.
+
+![](http://training.runcloudrun.com/images/jenkins3.png)
+
+**Git Configuration**: The next configuration item of interest is the git SCM URL. It specifies the URL of the git repository to use, the branch to use, etc. This section is important if you want to use Jenkins to build a project which exists outside of OpenShift Enterprise.  This would be useful for developers who have an internal repo for their source code that they would prefer to build from.
+
+**Build Configuration**: The last configuration which is interesting is under the *build section*. Here you can specify a shell script for building the project. For our job it does the following
+
+* Specify whether project should be built using Java 6 or Java 7
+* Specify XMX memory configuration for maven and build the maven project. The memory it configures is 396M.
+* Deploying the application which includes stopping the application, pushing the content back from Jenkins to the application gear(s), and finally deploying the artifacts.
+
+The source code for the default build script is as follows:
+
+	source /usr/libexec/openshift/cartridges/abstract/info/lib/jenkins_util
+	
+	jenkins_rsync 4d1b096e414243e9833dad55d774de73@todo-ose.example.com:~/.m2/ ~/.m2/
+	
+	# Build setup and run user pre_build and build
+	. ci_build.sh
+	
+	if [ -e ${OPENSHIFT_REPO_DIR}.openshift/markers/java7 ];
+	then
+	  export JAVA_HOME=/etc/alternatives/java_sdk_1.7.0
+	else
+	    export JAVA_HOME=/etc/alternatives/java_sdk_1.6.0
+	fi
+	
+	export MAVEN_OPTS="$OPENSHIFT_MAVEN_XMX"
+	mvn --global-settings $OPENSHIFT_MAVEN_MIRROR --version
+	mvn --global-settings $OPENSHIFT_MAVEN_MIRROR clean package -Popenshift -DskipTests
+	
+	# Deploy new build
+	
+	# Stop app
+	jenkins_stop_app 4d1b096e414243e9833dad55d774de73@todo-ose.example.com
+	
+	# Push content back to application
+	jenkins_sync_jboss 4d1b096e414243e9833dad55d774de73@todo-ose.example.com
+	
+	# Configure / start app
+	$GIT_SSH 4d1b096e414243e9833dad55d774de73@todo-ose.example.com deploy.sh
+	
+	jenkins_start_app 4d1b096e414243e9833dad55d774de73@todo-ose.example.com
+	
+	$GIT_SSH 4d1b096e414243e9833dad55d774de73@todo-ose.example.com post_deploy.sh
+	      
+**Deploying code to Jenkins**
+
+Now that you have the Jenkins client embedded into your *todo* application gear, any future *git push* commands will send the code to the Jenkins server for building.  To test this out, lets edit the *src/main/webapp/todo.xhtml* source file and change the title of the page.  If you do have this file, just create a new file instead.  Look for the following code block:
+
+	<h2>Todo List Creation</h2>
+	
+Change the above code to the following:
+
+	<h2>Todo List Creation using Jenkins</h2>
+	
+Commit and push your change:
+
+	$ git commit -am “changed h2”
+	$ git push
+	
+After you push your changes to the Jenkins server, you should see the following output:
+
+	Counting objects: 5, done.
+	Delta compression using up to 8 threads.
+	Compressing objects: 100% (3/3), done.
+	Writing objects: 100% (3/3), 282 bytes, done.
+	Total 3 (delta 2), reused 0 (delta 0)
+	remote: restart_on_add=false
+	remote: Executing Jenkins build.
+	remote: 
+	remote: You can track your build at https://jenkins-ose.example.com/job/todo-build
+	remote: 
+	remote: Waiting for build to schedule....Done
+	remote: Waiting for job to complete.....................................................................Done
+	remote: SUCCESS
+	remote: New build has been deployed.
+	To ssh://4d1b096e414243e9833dad55d774de73@todo-ose.example.com/~/git/todo.git/
+	   eb5f9dc..8cee826  master -> master
+
+While the build happening, if you open up a new terminal window and run the following command:
+
+	$ rhc domain show
+	
+You will see a new gear created by the Jenkins application.  This new gear is a temporary gear that OpenShift Enterprise creates in order to build your application code.
+
+	  todobldr @ http://todobldr-ose.example.com/
+	  ===========================================
+	    Application Info
+	    ================
+	      UUID      = ffee273344bd404e99e59ba070512d0b
+	      Git URL   =
+	ssh://ffee273344bd404e99e59ba070512d0b@todobldr-ose.example.com/~/git/todobldr.git/
+	      SSH URL   = ssh://ffee273344bd404e99e59ba070512d0b@todobldr-ose.example.com
+	      Gear Size = small
+	      Created   = 2:48 PM
+	    Cartridges
+	    ==========
+	      jbosseap-6.0
+	      
+If the build fails, or if you just want to see the output of the Maven build process, you can log in to your Jenkins applications, click on the build, and then click the link to view the console output.  Log in to your Jenkins application and view the contents of the last build.
+
+![](http://training.runcloudrun.com/images/jenkins4.png)
+
+##**Starting a new build**
+
+One of the great things about integrating your application with the Jenkins CI environment is the ability to start a new without having to modify and push your source code.  You initiate a new build, log in to the Jenkins dashboard and select the *todo* builder.  Point your browser to:
+
+	https://jenkins-ose.example.com/
+	
+Once you have been authenticated, click the *todo-build* link:
+
+![](http://training.runcloudrun.com/images/jenkins5.png)
+
+This will place you on the *todo* application builder dashboard.  Click the *Build Now* link on the left hand side of the screen to initiate a new build:
+
+![](http://training.runcloudrun.com/images/jenkins6.png)
+
+After you click the *Build Now* link, a new build will show up under the links on the left hand side of the screen.
+
+![](http://training.runcloudrun.com/images/jenkins7.png)
+
+For more information about the current build, you can click on the build to manage and view details, include the console output, for the build.
+
+
+**Lab 29 Complete!**
+<!--BREAK-->
+#**Lab 30:  Using JBoss Tools (Estimated time: 30 minutes)**
+
+**Server used:**
+
+* localhost
+
+**Tools used:**
+
+* eclipse
+
+JBoss Tools is an umbrella project for a set of Eclipse plugins that supports JBoss and related technology; there is support for OpenShift Hibernate, JBoss AS, Drools, jBPM, JSF, (X)HTML, Seam, Maven, JBoss ESB, JBoss Portal and more...
+
+##**Download and install Eclipse - Juno**
+
+In this lab, we are going to use the latest version of JBoss Tools.  In order to make use of this version, we will need to use the Juno version of the popular Eclipse IDE.  Head on over to the eclipse.org website and download the latest version of Eclipse for Java EE developers.
+
+Once you have Eclipse installed, go to the JBoss Tools page located at
+
+	http://www.jboss.org/tools
+	
+and follow the instructions to install JBoss Tools 4.0 (Juno).  
+
+##**Using JBoss Tools and OpenShift Enterprise**
+
+By default, JBoss Tools OpenShift integration will default to use the OpenShift Online service that is hosted by Red Hat.  In order for us to use JBoss Tools for our OpenShift Enterprise installation, we need to configure Eclipse with our *LIBRA_SERVER* setting.  This is a straight forward process.  To make the change, edit the *eclipse.ini* file located in the root directory of your Eclipse deployment and add *-Dlibra_server=broker.example.com* directly after the the following line:
+
+	-vmargs
+	
+When finished, it should look like this:
+
+	-vmargs
+	-Dlibra_server=broker.example.com
+	
+**Note:** If you are using the Mac OS X operating system, the process is a little more complicated.  In order to pass arguments to Eclipse, you'll have to edit the eclipse.ini file inside the Eclipse application bundle: select the Eclipse application bundle icon while holding down the Control Key. This will present you with a popup menu. Select "Show Package Contents" in the popup menu. Locate eclipse.ini file in the Contents/MacOS sub-folder and open it with your favorite text editor to edit the command line options. 
+
+On my OS X operating system, after editing the file it looks like following:
+
+	-startup
+	../../../plugins/org.eclipse.equinox.launcher_1.3.0.v20120522-1813.jar
+	--launcher.library
+	../../../plugins/org.eclipse.equinox.launcher.cocoa.macosx.x86_64_1.1.200.v20120522-1813
+	-product
+	org.eclipse.epp.package.jee.product
+	--launcher.defaultAction
+	openFile
+	-showsplash
+	org.eclipse.platform
+	--launcher.XXMaxPermSize
+	256m
+	--launcher.defaultAction
+	openFile
+	-vmargs
+	-Dlibra_server=broker.example.com
+	-Dosgi.requiredJavaVersion=1.5
+	-Dhelp.lucene.tokenizer=standard
+	-XstartOnFirstThread
+	-Dorg.eclipse.swt.internal.carbon.smallFonts
+	-XX:MaxPermSize=256m
+	-Xms40m
+	-Xmx512m
+	-Xdock:icon=../Resources/Eclipse.icns
+	-XstartOnFirstThread
+	-Dorg.eclipse.swt.internal.carbon.smallFonts
+	
+After adding the correct arguments to the *eclipse.ini* file, restart the Eclipse IDE.
+
+##**Create an OpenShift Enterprise application**
+
+Now that we have Eclipse Juno and JBoss Tools 4.0 installed, we can create an OpenShift Enterprise application without having the leave the comfort of our favorite IDE.  Click on the *OpenShift Applicaiton* link that is provided on the JBoss Central screen.
+
+![](http://training.runcloudrun.com/images/jbosstools1.png)
+
+Once you click on the link to create a new OpenShift Enterprise application, you will be presented with a dialog to authenticate to the OpenShift Enterprise.  Now is also a good time to validate the *Server* setting is correctly set to *broker.example.com*.  If your server does not reflect this, you have not configured your *eclipse.ini* file correctly.  If you are unable to configure your *eclipse.ini* file as specified in this lab, inform the instructor so that he/she may help out.
+
+![](http://training.runcloudrun.com/images/jbosstools2.png)
+
+After clicking *next*, the JBoss Tools plugin will authenticate you to the broker host and present another dialog box to you.  On this dialog box, you have the option of creating a new application, or to use an existing one.  Since we already have a JBoss EAP application, the *todo* application, deployed, lets select to *Use existing application* and click the *Browse* button.  After clicking the *Browse* button, a REST API call be made to the broker host to retrieve the current applications that you already have deployed.  
+
+![](http://training.runcloudrun.com/images/jbosstools3.png)
+
+Highlight the *todo* application and click on the *Details...* button.  This will display all of the necessary information about the application, including any gears that may be embedded.
+
+![](http://training.runcloudrun.com/images/jbosstools4.png)
+
+After clicking *Next*, Eclipse will ask you to create a new project or to use an existing one.  Let’s create a new one and set the correct location where we want to store the project files.
+
+![](http://training.runcloudrun.com/images/jbosstools5.png)
+
+Once you click the *Finish* button, the existing application will be cloned to your local project.
+
+
+##**Managing OpenShift Enterprise application with JBoss Tools**
+
+JBoss Tools provide many features to allow a developer to manage their application from directly inside of the Eclipse IDE.  This includes features such as viewing log files, publishing the application, and port-forwarding.  Click on the servers tab at the bottom on the Eclipse IDE to see your OpenShift Enterprise server.
+
+![](http://training.runcloudrun.com/images/jbosstools6.png)
+
+###**Tailing log files**
+
+After clicking on the *servers* tab, right click on your OpenShift Enterprise server and then select *OpenShift* and finally select *tail files*.
+
+![](http://training.runcloudrun.com/images/jbosstools7.png)
+
+You will now be able to view the log files in the console tab that has been opened for you inside of Eclipse.
+
+###**Viewing environment variables**
+
+After clicking on the *servers* tab, right click on your OpenShift Enterprise server and then select *OpenShift* and finally select *Environment Variables*.  Once you select this option, all of the system environment variables, including database connections, will be displayed in the console window of Eclipse.
+
+###**Using port-forwarding**
+
+After clicking on the *servers* tab, right click on your OpenShift Enterprise server and then select *OpenShift* and finally select *Port forwarding*.  This will open up a new dialog that displays which services and what IP address will be used for the forwarded services.
+
+![](http://training.runcloudrun.com/images/jbosstools8.png)
+
+For the next section of this lab, ensure that you click on *Start Forwarding* so that we will be able to connect to PostgreSQL from our local machine.
+
+###**Adding PostgreSQL as an Eclipse data source**
+
+Download the latest PostgreSQL driver from the following location
+
+	http://jdbc.postgresql.org/download.html
+	
+and save it to your local computer.  Once you have the file downloaded, click on the *Data Source Explorer* tab, right click on *Database Connection* and select *New*.  This will open the following dialog where you will want to select PostgreSQL:
+
+![](http://training.runcloudrun.com/images/db1.png)
+
+Initially, the *Drivers* pull down box will be empty.  In order to add our PostgreSQL driver, click the plug sign next to the drop down, highlight *PostgreSQL JDBC Driver* and then click on *JAR List*.  Click on *Add JAR/Zip* and browse to the location of the JDBC4 driver that you downloaded.
+
+Now that you have added the driver, the dialog box will display the available driver and allow you to specify your connection details.  Enter the following information:
+
+* Database: todo
+* URL: jdbc:postgresql://127.0.0.1:5432/todo
+* User name: admin	
+* Password: The password supplied by OpenShift.  If you forgot this, use the *Environment Variables* utility provided by JBoss Tools.
+
+In order to verify that your port-forwarding and database connection is setup correctly, press the *test connection* button.  If your connection is failing, make sure that you have the correct authorization credentials and that port-fowarding is started via JBoss Tools.
+
+Once you have correctly added the database connection, you should now see the remote database from the OpenShift Enterprise node host available for usage in your local IDE.
+
+![](http://training.runcloudrun.com/images/db2.png)
+
+At this point, you should be able to use any of the database tools provided for Eclipse to communicate and manage your OpenShift Enterprise PostgreSQL database.
+
+##**Making a code change and deploying application**
+
+In the project view, expand the source files for the *src/main/webapp* directory and edit the todo.xhtml source file.  Change the following line
+
+	<h2>Todo List Creation using Jenkins</h2>
+	
+to the include JBoss Tools
+
+	<h2>Todo List Creation using Jenkins and JBoss Tools</h2>
+	
+Once you have made the source code change, save the contents of the file and then use the *Team* functionality by right clicking on your project to commit and push the changes to your OpenShift Enterprise server.  This push will follow the same workflow used previously by initiating a build on your Jenkins server.
+
+![](http://training.runcloudrun.com/images/tools1.png)
+
+After you push your changes, open up your Jenkins dashboard and open the *Console Output* screen to see the build progress.  Once your build has completed, Eclipse will display a dialog box with a summary of the deployment:
+
+![](http://training.runcloudrun.com/images/tools2.png)
+
+Verify that your changes were deployed correctly by opening up a web browser and going to the following URL:
+
+	http://todo-ose.example.com/	
+	
+![](http://training.runcloudrun.com/images/tools3.png)
+
+**Lab 30 Complete!**
+<!--BREAK-->
+
+#**Lab 31: Using quickstarts (Estimated time: 10 minutes)**
 
 
 **Server used:**
@@ -3575,7 +4010,7 @@ Given the number of available quick starts, you may have to use the search funct
 
 ![](http://training.runcloudrun.com/images/quickstart.png)
 
-**Lab XX Complete!**
+**Lab 31 Complete!**
 <!--BREAK-->
 
 
@@ -3635,3 +4070,6 @@ The above commands will stop the users application and them remove the applicati
 #**Appendix B - RHC command line reference**
 
 <!--BREAK-->
+
+
+
