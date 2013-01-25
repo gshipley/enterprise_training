@@ -2641,6 +2641,17 @@ Open up a web browser and point to the following URL:
 	
 If the restore process worked correctly, you should see the restored application running just as it was before the delete operating that you performed earlier in this lab.
 
+##**Viewing a thread dump of an application**
+
+**Note:** The following sections requires a Ruby or JBoss application type.  Since we have not created one yet in this class, read through the material below but don’t actually perform the commands until a later lab.
+
+You can trigger a thread dump for Ruby and JBoss applications using the *rhc threaddump* command. A thread dump is a snapshot of the state of all threads that are part of the runtime process.  If an application appears to have stalled or is running out of resources, a thread dump can help to reveal the state of the runtime, to identify what might be causing any issues and ultimately to help resolve the problem. To trigger a thread dump execute the following command:
+
+	$ rhc threaddump -a ApplicationName
+	
+After running this command using JBoss or Ruby application, you will be given a log file that you can tail to view the details of the thread dump.  Issue the following command, substituting the correct log file:
+
+	$ rhc tail ApplicationName -f ruby-1.9/logs/error_log-20130104-000000-EST -o '-n 250'
 
 **Lab 23 Complete!**
 <!--BREAK-->
@@ -2656,6 +2667,8 @@ If the restore process worked correctly, you should see the restored application
 * rhc
 * mysql
 * tail
+* git
+* PHP
 
 Cartridges provide the actual functionality necessary to run applications. Currently, there are several cartridges available to support different programming languages, databases, monitoring and management. Cartridges are designed to be extensible so the community can add support for any programming language, database or any management tool not supported by OpenShift Enterprise. Please refer to the documentation on how you can [write your own cartridge](https://openshift.redhat.com/community/wiki/introduction-to-cartridge-building).
 
@@ -2875,11 +2888,702 @@ Now that you have your services forward, you can connect to them using your loca
 
 **Lab 24 Complete!**
 <!--BREAK-->
+
+#**Lab 25: Using the web console to create applications (Estimated time: 10 minutes)**
+
+
+**Server used:**
+
+* localhost
+
+**Tools used:**
+
+* OpenShift Enterprise web console
+* git
+
+OpenShift Enterprise provides users with multiple ways to create and management applications.  The platform provides command line tools, IDE integration, REST APIs, and a web console.  During this lab, we will explore the creation and management of application using the web console.
+
+Having DNS resolution setup on your local machine, as discussed in lab 16, is crucial to completing this lab.
+
+##**Authenticate to the web console**
+
+Open your favorite web browser and go to the following URL:
+
+	http://broker.example.com
+	
+Once you enter the above URL, you will be asked to authenticate using basic auth.  For this training class, you can use the demo account that you created in a previous lab.  
+
+![](http://training.runcloudrun.com/images/consoleAuth.png)
+
+After entering in valid credentials, you will see the main OpenShift Enterprise web console dashboard:
+
+![](http://training.runcloudrun.com/images/consoleDashboard.png)
+
+##**Creating a new application**
+
+In order to create a new application using the web console, click on the *ADD APPLICATION* button.  You will then be presented with a list of available run times that you can choose from.  To follow along with our PHP examples above, let’s create a new PHP application and name it *phptwo*.
+
+![](http://training.runcloudrun.com/images/php2.png)
+
+![](http://training.runcloudrun.com/images/php2.1.png)
+
+Once you have created the application, you will see a confirmation screen with some very important information:
+
+* URL for your application
+* GIT repository URL
+* Instructions for making code changes
+* Link to add a cartridge
+
+![](http://training.runcloudrun.com/images/php2.2.png)
+
+
+##**Clone your application repository**
+
+Open up a command prompt and clone your application repository with the instructions provided.  Once you have a local copy of your application, make a small code change to the *index.php* and push your changes to your OpenShift Enterprise gear.
+
+Once you have made a code change, view your application in a web browser to ensure that the code was deployed correctly to your server.
+
+##**Adding a cartridge with the web console**
+
+Click on the *My Applications* tab at the top of the screen and then select the *Phptwo* application by clicking on it.
+
+![](http://training.runcloudrun.com/images/php2.3.png)
+
+After clicking on the *Phptwo* application link, you will be presented with the management dashboard for that application.  On this page, you can view the GIT repository URL, add a cartridge, or delete the application.  We want to add the MySQL database to our application so click on the *ADD CARTRIDGE* button.
+
+![](http://training.runcloudrun.com/images/php2.4.png)
+
+On the next screen, select the MySQL 5.1 cartridge.
+
+![](http://training.runcloudrun.com/images/php2.5.png)
+
+Once the MySQL database cartridge has been added to your application, the web console will display the confirmation screen which also contains the connection information for your database.
+
+![](http://training.runcloudrun.com/images/php2.6.png)
+
+If you recall from a previous lab, the connection information is always available via environment variables on your OpenShift Enterprise gear.
+
+##**Verify database connection**
+
+Using information you learned in a previous lab, add a PHP file that tests the connection to the database.  You will need to modify the previously used PHP code block to only display if the connection was successful as we have not created a schema for this new database instance.
+
+
+**Lab 25 Complete!**
+<!--BREAK-->
+#**Lab 26: Scaling an application (Estimated time: 15 minutes)**
+
+
+**Server used:**
+
+* localhost
+* node host
+
+**Tools used:**
+
+* rhc
+* ssh
+* git
+* touch
+* pwd
+
+Application scaling enables your application to react to changes in traffic and automatically allocate the necessary resources to handle your current demand. The OpenShift Enterprise infrastructure monitors incoming web traffic and automatically brings copies of your web cartridge online to handle requests.
+
+##**How scaling works**
+
+If you create a non-scaled application, the web cartridge occupies only a single gear and all traffic is sent to that gear. When you create a scaled application, it consumes two gears; one for the high-availability proxy (HAProxy) itself, and one for your actual application. If you add other cartridges like PostgreSQL or MySQL to your application, they are installed on their own dedicated gears.
+
+The HAProxy cartridge sits between your application and the network and routes web traffic to your web cartridges. When traffic increases, HAProxy notifies the OpenShift Enterprise servers that it needs additional capacity. OpenShift checks that you have a free gear (out of your max number of gears) and then creates another copy of your web cartridge on that new gear. The code in the git repository is copied to each new gear, but the data directory begins empty. When the new cartridge copy starts it will invoke your build hooks and then the HAProxy will begin routing web requests to it. If you push a code change to your web application all of the running gears will get that update.
+
+The algorithm for scaling up and scaling down is based on the number of concurrent requests to your application. OpenShift Enterprise allocates 10 connections per gear - if HAProxy sees that you're sustaining 90% of your peak capacity, it adds another gear. If your demand falls to 50% of your peak capacity for several minutes, HAProxy removes that gear. Simple!
+
+Because each cartridge is "shared-nothing", if you want to share data between cartridges you can use a database cartridge. Each of the gears created during scaling has access to the database and can read and write consistent data. As OpenShift Enterprise grows we anticipate adding more capabilities like shared storage, scaled databases, and shared caching. 
+
+The OpenShift web console shows you how many gears are currently being consumed by your application. We have lots of great things coming for web application scaling, so stay tuned.
+
+##**Create a scaled application**
+
+In order to create a scaled application using the *rhc* command line tools, you need to specify the *-s* switch to the command.  Let’s create a scaled PHP application with the following command:
+
+	$ rhc app create scaledapp -t php -s
+	
+After entering the above command, you should see output that specifies that you are using both the PHP and HAProxy cartridges:
+
+	Password: ****
+	
+	Creating application 'scaledapp'
+	================================
+	
+	  Scaling:   yes
+	  Namespace: ose
+	  Cartridge: php
+	  Gear Size: default
+	
+	Your application's domain name is being propagated worldwide (this might take a minute)...
+	The authenticity of host 'scaledapp-ose.example.com (10.4.59.221)' can't be established.
+	RSA key fingerprint is 6c:a5:e5:fa:75:db:5a:7f:dc:a2:44:ed:e4:97:af:3c.
+	Are you sure you want to continue connecting (yes/no)? yes
+	Cloning into 'scaledapp'...
+	done
+	
+	scaledapp @ http://scaledapp-ose.example.com/
+	=============================================
+	  Application Info
+	  ================
+	    UUID      = 1a6d471841d84e8aaf25222c4cdac278
+	    Gear Size = small
+	    Git URL   =
+	ssh://1a6d471841d84e8aaf25222c4cdac278@scaledapp-ose.example.com/~/git/scaledapp.git/
+	    SSH URL   = ssh://1a6d471841d84e8aaf25222c4cdac278@scaledapp-ose.example.com
+	    Created   = 4:20 PM
+	  Cartridges
+	  ==========
+	    php-5.3
+	    haproxy-1.4
+	  Scaling Info
+	  ============
+	    Scaled x2 (minimum: 2, maximum: available gears) with haproxy-1.4 on small gears
+	
+	RESULT:
+	Application scaledapp was created.
+	
+Log in to the web console with your browser and click on the *scaledapp* application.  You will notice with looking at the gear details that it lists the number of gears that your application is currently using.
+
+![](http://training.runcloudrun.com/images/scaledApp.png)
+
+##**Setting scaling strategy**
+
+OpenShift Enterprise allows users the ability to set the minimum and maximum numbers of gears that an application can use to handle increased HTTP traffic.  This scaling strategy is exposed via the web console.  While on the application details screen, click the *Scaled up with HAProxy x2* button to change the default scaling rules.
+
+![](http://training.runcloudrun.com/images/scaledApp2.png)
+
+##**Manual scaling**
+
+There are often times when a developer will want to disable automatic scaling in order to manually control when a new gear is added to an application.  Some examples of when manual scaling may be preferred over automatic scaling could include:
+
+* If you are anticipating a certain load on your application and wish to scale it accordingly. 
+* You have a fixed set of resources for your application. 
+
+OpenShift Enterprise supports this workflow by allowing users to manually add and remove gears for an application.  The instructions below describe how to disable the automatic scaling feature. It is assumed you have already created your scaled application as detailed in this lab and are at the root level directory for the application.
+
+* From your locally cloned Git repository, create a disable autoscaling marker, as shown in the example below:
+	
+	$ touch .openshift/markers/disable_auto_scaling
+	$ git add .
+	$ git commit -a “remove automatic scaling”
+	$ git push
+	
+To add a new gear to your application, ssh to your node host and enter the following command:
+
+	 $ add-gear -a [AppName] -u [AppUUID] -n [DomainName]
+	 
+In this lab, the application name is *scaledapp*, the application UUID is the username that you used to ssh in to the node host, and the domain name is *ose*.  Given that information, your command should looking similar to the following:
+
+	[scaledapp-ose.example.com ~]\> add-gear -a scaledapp -u 1a6d471841d84e8aaf25222c4cdac278 -n ose
+	
+Verify that your new gear was added to the application by running the *rhc app show* command or by looking at the application details on the web console.
+
+	$ rhc app show scaledapp
+	
+Once running the command, you should see the this application is now using three gears.
+
+	scaledapp @ http://scaledapp-ose.example.com/
+	=============================================
+	  Application Info
+	  ================
+	    SSH URL   = ssh://1a6d471841d84e8aaf25222c4cdac278@scaledapp-ose.example.com
+	    Gear Size = small
+	    Git URL   = ssh://1a6d471841d84e8aaf25222c4cdac278@scaledapp-ose.example.com/~/git/scaledapp.git/
+	    Created   = 4:20 PM
+	    UUID      = 1a6d471841d84e8aaf25222c4cdac278
+	  Cartridges
+	  ==========
+	    php-5.3
+	    haproxy-1.4
+	  Scaling Info
+	  ============
+	    Scaled x3 (minimum: 2, maximum: available gears) with haproxy-1.4 on small gears
+	    
+	  
+![](http://training.runcloudrun.com/images/scaledApp3.png)
+
+Just as we scaled up with the *add-gear* command, we can manually scale down with the *remove-gear* command.  Remove the third gear from your application with the following command making sure to substitute the correct application UUID:
+
+	[scaledapp-ose.example.com ~]\> remove-gear -a scaledapp -u 1a6d471841d84e8aaf25222c4cdac278 -n ose
+	
+After removing the gear with the *remove-gear* command, verify that the application only contains two gears, HAProxy and a single runtime gear.
+
+	$  rhc app show scaledapp
+	
+	scaledapp @ http://scaledapp-ose.example.com/
+	=============================================
+	  Application Info
+	  ================
+	    Created   = 4:20 PM
+	    Gear Size = small
+	    SSH URL   = ssh://1a6d471841d84e8aaf25222c4cdac278@scaledapp-ose.example.com
+	    Git URL   = ssh://1a6d471841d84e8aaf25222c4cdac278@scaledapp-ose.example.com/~/git/scaledapp.git/
+	    UUID      = 1a6d471841d84e8aaf25222c4cdac278
+	  Cartridges
+	  ==========
+	    php-5.3
+	    haproxy-1.4
+	  Scaling Info
+	  ============
+	    Scaled x2 (minimum: 2, maximum: available gears) with haproxy-1.4 on small gears
+
+##**Viewing HAProxy information**
+
+OpenShift Enterprise provides a dashboard that will give users relevant information about the status of the HAProxy gear that is balancing and managing load between the application gears.  The dashboard provides visibility into metrics such as process id, uptime, system limits, current connections, and running tasks.  To view the HAProxy dashboard, open your web browser and enter the following URL:
+
+	http://scaledapp-ose.example.com/haproxy-status/
+	
+![](http://training.runcloudrun.com/images/scaledApp4.png)
+
+
+**Lab 26 Complete!**
+<!--BREAK-->
+#**Lab 27: The DIY application type (Estimated time: 10 minutes)**
+
+**Server used:**
+
+* localhost
+
+**Tools used:**
+
+* rhc
+* git
+
+In addition to supporting Ruby, PHP, Perl, Python, and Java EE6, the OpenShift Enterprise environment supports the "Do it Yourself" or "DIY" application type. Using this application type, you can run just about any program that speaks HTTP.
+
+How this works is remarkably straightforward. The OpenShift Enterprise execution environment is a carefully secured Red Hat Enterprise Linux operating system on x64 systems. Thus, OpenShift can run any binary that will run on RHEL 6.3 x64.
+
+The way that OpenShift Enterprise DIY runtimes interfaces your application to the outside world is by creating an HTTP proxy specified by the environment variables *OPENSHIFT_INTERNAL_IP* and *OPENSHIFT_INTERNAL_PORT*. All your application has to do is bind and listen on that address and port. HTTP requests will come into the OpenShift Enterprise environment, which will proxy those requests to your application. Your application will reply with HTTP responses, and the OpenShift Enterprise environment will relay those responses back to your users.
+
+Your application will be executed by the .openshift/action_hooks/start script, and will be stopped by the .openshift/action_hooks/stop script.
+
+**Note:** DIY applications are unsupported but is a great way for developers to try out unsupported languages, frameworks, or middleware that doesn’t ship as an OpenShift Enterprise cartridge.
+
+##**Create a DIY application type**
+
+To create an application gear that will use the DIY application type, use the *rhc app create* command:
+
+	$ rhc app create -a myjavademo -t diy
+	$ cd diy
+	
+##**Deploy application code**
+
+Instead of spending time in this lab with writing a server runtime, we are going to use an existing that is available on the OpenShift github page.  This application code consists of a single MyHttpServer main class.  Since this source code lives on the github OpenShift project page, we need to add the remote github repository and then pull the remote source code while at the same time overwriting the existing source code we have in our DIY application directory.
+
+	$ git remote add upstream git@github.com:openshift/openshift-diy-java-demo.git
+	$ git pull -s recursive -X theirs upstream master
+	$ git push
+	
+##**Verify DIY application is working**
+
+Once the java example has been pushed to your OpenShift Enterprise gear, open up a web browser and point to the following URL:
+
+	http://myjavademo-ose.example.com/index.html
+	
+**Note:** Make sure to include the index.html file on the end of the URL.
+
+If the application was deployed correctly, you should see a *Hello DIY World!* message.  The little http java server will serve any files found in your application's html directory, so you can add files or make changes to them, push the contents and see those reflected in your browser.
+
+##**Under the covers**
+
+The DIY cartridge provides a number of hooks that are called out during the lifecycle actions of the application. The hooks available to you for customization are found in the .openshift/action_hooks directory of your application repository. 
+
+For this application, all that has been customized are the start/stop scripts. They simply launch the MyHttpServer class using java, and perform a wget call to have the MyHttpServer stop itself:
+
+	cat .openshift/action_hooks/start 
+	#!/bin/bash
+	# The logic to start up your application should be put in this
+	# script. The application will work only if it binds to
+	# $OPENSHIFT_INTERNAL_IP:8080
+	
+	cd $OPENSHIFT_REPO_DIR
+	nohup java -cp bin test.MyHttpServer >${OPENSHIFT_DIY_LOG_DIR}/MyHttpServer.log 2>&1 &
+	
+	[24](ironmaiden:diy) > cat .openshift/action_hooks/stop
+	#!/bin/bash
+	# The logic to stop your application should be put in this script.
+	wget http://${OPENSHIFT_INTERNAL_IP}:${OPENSHIFT_INTERNAL_PORT}?action=stop
+	
+See the src/test/MyHttpServer.java source to understand how the java application is making use of the OpenShift environment variables to interact with the server environment.
+
+**Lab 27 Complete!**
+<!--BREAK-->
+#**Lab 28:  Java EE applications using JBoss EAP (Estimated time: 30 minutes)**
+
+**Server used:**
+
+* localhost
+
+**Tools used:**
+
+* rhc
+* git
+* curl
+
+OpenShift Enterprise provides the JBoss EAP runtime to facilitate the deployment of Java EE 6 applications  
+
+JBoss Enterprise Application Platform 6 (JBoss EAP 6) is a fully compliant Java EE 6 platform which includes which includes a subscription model with long-term support, platform certification, service packs and SLA(s).  In this lab we will build a simple todo application using Java EE 6 deployed on the JBoss EAP platform. The application will have a single entity called Todo and will persist todos to PostgreSQL using JPA. The application will also use EJB 3.1 Stateless session beans, Context and Dependency Inject(or CDI),and JAX RS for exposing RESTful web services.
+
+##**Create JBoss EAP application**
+
+**Note:** Before starting this lab, it is suggested that you delete any existing applications that you have deployed to your OpenShift Enterprise installation.  The OpenStack virtual machines that have been provided only contain 2gb of memory.
+
+	$ rhc app create -a todo -t jbosseap
+	
+Just as we saw in previous labs, a template has been deployed for you at the following URL:
+
+	http://todo-ose.example.com
+	
+Verify that the application has been deployed and the template is displaying correctly in your web browser.
+
+##**Additional marker files for JBoss EAP**
+
+If you recall from a previous lab, we discussed the way that OpenShift Enterprise allows the developer to control and manage some of the runtime features using marker files.  For Java based deployments, there are additional marker files that a developer needs to be aware of.
+
+ * enable_jpda - Will enable the JPDA socket based transport on the java virtual machine running the JBoss EAP application server. This enables you to remotely debug code running inside the JBoss application server.
+
+   * skip\_maven_build - Maven build step will be skipped
+   * force\_clean_build - Will start the build process by removing all non essential Maven dependencies.  Any current dependencies specified in your pom.xml file will then be re-downloaded.
+   * hot_deploy - Will prevent a JBoss container restart during build/deployment.  Newly built archives will be re-deployed automatically by the JBoss HDScanner component.
+   * java7 - Will run JBoss EAP with Java7 if present. If no marker is present then the baseline Java version will be used (currently Java6)
+
+##**Deployment directory**
+
+If you list the contents of the application that was cloned to your local machine, you will notice a deployments directory.  This directory is a location that a developer can place binary archive files, .ear files for example, for deployment.  If you want to deploy a .war file rather than pushing source code, copy the .war file to deployments directory, add the .war file to your git repository, commit the change, and then push the content to your OpenShift Enterprise server.
+
+##**Maven**
+
+OpenShift Enterprise uses the Maven build system for all Java projects.  Once you add new source code following the Maven directory structure, OpenShift Enterprise will recognize the existing *pom.xml* if your applications root directory and build the code remotely.  
+
+The most important thing specified in the *pom.xml* file is a Maven profile named *openshift*. This is the profile which is invoked when you do deploy the code to OpenShift.
+
+##**Embed PostgreSQL cartridge**
+
+The *todo* sample application that we are going to write as part of this lab will make use of the PostgreSQL database.  Using the information that you have learned from previous labs, add the PostgreSQL cartridge to the *todo* application.
+
+##**Building the *todo* application**
+
+At this point, we should have an application called *todo* created and have PostgreSQL embedded in the application to use as our datastore.  Now we can begin working on the application.
+
+###**Creating Domain Model**
+
+**Note:** The source code for this application is available on github at the following URL:
+
+	https://github.com/gshipley/todo-javaee6
+	
+If you want the easy way out, use the information you learned from a previous lab to add the above repository as a remote repository and then pull in the source code while overwriting the existing template.
+
+The first thing that we have to do is to create the domain model for the *todo application*. The application will have a single entity called Todo as shown below. The entity shown below is a simple JPA entity with JPA and bean validation annotations.  Create a source file named *Todo.java* in the *todo/src/main/java/com/todo/domain* directory with the following contents:
+
+package com.todo.domain;
+
+	import java.util.Date;
+	import java.util.List;
+	
+	import javax.persistence.CollectionTable;
+	import javax.persistence.Column;
+	import javax.persistence.ElementCollection;
+	import javax.persistence.Entity;
+	import javax.persistence.FetchType;
+	import javax.persistence.GeneratedValue;
+	import javax.persistence.GenerationType;
+	import javax.persistence.Id;
+	import javax.persistence.JoinColumn;
+	import javax.validation.constraints.NotNull;
+	import javax.validation.constraints.Size;
+	
+	@Entity
+	public class Todo {
+	
+		@Id
+		@GeneratedValue(strategy = GenerationType.AUTO)
+		private Long id;
+	
+		@NotNull
+		@Size(min = 10, max = 40)
+		private String todo;
+		
+		@ElementCollection(fetch=FetchType.EAGER)
+		@CollectionTable(name = "Tags", joinColumns = @JoinColumn(name = "todo_id"))
+		@Column(name = "tag")
+		@NotNull
+		private List<String> tags;
+	
+		@NotNull
+		private Date createdOn = new Date();
+	
+		public Todo(String todo) {
+			this.todo = todo;
+		}
+	
+		public Todo() {
+		}
+	
+		public Long getId() {
+			return id;
+		}
+	
+		public void setId(Long id) {
+			this.id = id;
+		}
+	
+		public String getTodo() {
+			return todo;
+		}
+	
+		public void setTodo(String todo) {
+			this.todo = todo;
+		}
+	
+		public Date getCreatedOn() {
+			return createdOn;
+		}
+	
+		public void setCreatedOn(Date createdOn) {
+			this.createdOn = createdOn;
+		}
+		
+		
+		public void setTags(List<String> tags) {
+			this.tags = tags;
+		}
+		
+		public List<String> getTags() {
+			return tags;
+		}
+	
+		@Override
+		public String toString() {
+			return "Todo [id=" + id + ", todo=" + todo + ", tags=" + tags
+					+ ", createdOn=" + createdOn + "]";
+		}
+	
+	}
+	
+###**Create the *persistence.xml* file**
+
+The persistence.xml file is a standard configuration file in JPA that defines your data source. It has to be included in the META-INF directory inside the JAR file that contains the entity beans. The persistence.xml file must define a persistence-unit with a unique name. Create a *META-INF* directory under src/main/resources and then create a persistence.xml file with the contents below:
+
+	<?xml version="1.0" encoding="UTF-8" ?>
+	<persistence xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	        xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+	        version="2.0" xmlns="http://java.sun.com/xml/ns/persistence">
+	
+	        <persistence-unit name="todos" transaction-type="JTA">
+	                <provider>org.hibernate.ejb.HibernatePersistence</provider>
+	                <jta-data-source>java:jboss/datasources/PostgreSQLDS</jta-data-source>
+	                <class>com.todo.domain.Todo</class>
+	                <properties>
+	                        <property name="hibernate.show_sql" value="true" />
+	                        <property name="hibernate.hbm2ddl.auto" value="create" />
+	                </properties>
+	
+	        </persistence-unit>
+	</persistence>
+
+The *jta-data-source* refers to JNDI name preconfigured by OpenShift Enterprise in the standalone.xml file located in the *.openshift/config* directory.
+
+###**Create the TodoService EJB bean**
+
+Next we will create a stateless EJB bean TodoService in the *com.todo.service package*.  This bean will perform basic CRUD operation using *javax.persistence.EntityManager*.  Create a file named *TodoService* in the *src/main/java/com/todo/service* directory and add the following contents:
+
+	package com.todo.service;
+	
+	import java.util.List;
+	import javax.ejb.Stateless;
+	import javax.persistence.EntityManager;
+	import javax.persistence.PersistenceContext;
+	import com.todo.domain.Todo;
+	
+	@Stateless
+	public class TodoService {
+	
+	        @PersistenceContext
+	        private EntityManager entityManager;
+	
+	
+	        public Todo create(Todo todo) {
+	                entityManager.persist(todo);
+	                return todo;
+	        }
+	
+	        public Todo find(Long id) {
+	                Todo todo = entityManager.find(Todo.class, id);
+	                List<String> tags = todo.getTags();
+	                System.out.println("Tags : " + tags);
+	                return todo;
+	        }
+	}
+	
+###**Enable CDI**
+
+CDI or Context and Dependency injection is a Java EE 6 specification which enables dependency injection in a Java EE 6 project. To enable CDI in the *todo* project, create a *beans.xml* file in *src/main/webapp/WEB-INF* directory with the following contents:
+
+	<?xml version="1.0"?>
+	<beans xmlns="http://java.sun.com/xml/ns/javaee"
+	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://jboss.org/schema/cdi/beans_1_0.xsd"/>
+
+In order to use the @Inject annotation instead of the @Ejb annotation to inject an EJB, you will have to write a producer which will expose EntityManager.  Create a source file in the *src/main/java/com/todo/utils* directory named *Resources* and add the following source code:
+
+	package com.todo.utils;
+	
+	import javax.enterprise.inject.Produces;
+	import javax.persistence.EntityManager;
+	import javax.persistence.PersistenceContext;
+	
+	public class Resources {
+	
+	    @Produces
+	    @PersistenceContext
+	    private EntityManager em;
+	
+	}
+
+###**Creating RESTful web service**
+
+Before exposing a RESTful web service for the Todo entity, we need to enable JAX-RS in our application. To enable JAX-RS, create a class which extends *javax.ws.rs.core.Application* and specify the application path using a*javax.ws.rs.ApplicationPath* annotation.  Create a source file named *JaxRsActivator* in the *src/main/java/com/todo/rest* directory and add the following source code:
+
+	package com.todo.rest;
+	
+	import javax.ws.rs.ApplicationPath;
+	import javax.ws.rs.core.Application;
+	
+	@ApplicationPath("/")
+	public class JaxRsActivator extends Application {
+	   /* class body intentionally left blank */
+	}
+
+
+Next we will create a *TodoRestService* class which will expose two methods that will create and read a Todo object. The service will consume and produce JSON.  Create a source file named *TodoRestService* in the *src/main/java/com/todo/rest* directory and add the following source code:
+
+	package com.todo.rest;
+	
+	import javax.inject.Inject;
+	import javax.ws.rs.Consumes;
+	import javax.ws.rs.GET;
+	import javax.ws.rs.POST;
+	import javax.ws.rs.Path;
+	import javax.ws.rs.PathParam;
+	import javax.ws.rs.Produces;
+	import javax.ws.rs.WebApplicationException;
+	import javax.ws.rs.core.MediaType;
+	import javax.ws.rs.core.Response;
+	import javax.ws.rs.core.UriBuilder;
+	import com.todo.domain.Todo;
+	import com.todo.service.TodoService;
+	
+	@Path("/todos")
+	public class TodoRestService {
+	
+		@Inject
+		private TodoService todoService;
+	
+		@POST
+		@Consumes("application/json")
+		public Response create(Todo entity) {
+			todoService.create(entity);
+			return Response.created(
+					UriBuilder.fromResource(TodoRestService.class)
+							.path(String.valueOf(entity.getId())).build()).build();
+		}
+	
+		@GET
+		@Path("/{id:[0-9][0-9]*}")
+		@Produces(MediaType.APPLICATION_JSON)
+		public Todo lookupTodoById(@PathParam("id") long id) {
+			Todo todo = todoService.find(id);
+			if (todo == null) {
+				throw new WebApplicationException(Response.Status.NOT_FOUND);
+			}
+			return todo;
+		}
+	}
+	
+##**Deploy *todo* application to OpenShift Enterprise**
+
+Now that we have our application created, we need to push our changes to the OpenShift Enterprise gear that we created earlier in this lab. From the application root directory, issue the following commands:
+
+	$ git add .
+	$ git commit -am “Adding source code”
+	$ git push
+	
+Once you run the *git push* command, the application will begin building on the OpenShift Enterprise node host.  During this training class, the OpenStack virtual machines we have created are not production grade environments.  Because of this, the build process will take some time to complete.  Sit back, be patient, and help your fellow classmates who may be having problems.
+
+##**Testing the *todo* application**
+
+In order to test out the RESTful web service that we created in this lab, we can add and retrieve todo items using the *curl* command line utility.  To add a new item, enter the following command:
+
+	$ curl -k -i -X POST -H "Content-Type: application/json" -d '{"todo":"Sell a lot of OpenShift Enterprise","tags":["javascript","ui"]}' https://todo-ose.example.com/todos
+	
+To list all available todo items, run the following command:
+
+	$ curl -k -i -H "Accept: application/json" https://todo-ose.example.com/todos/1
+	
+You should see the following output:
+
+	HTTP/1.1 200 OK
+	Date: Fri, 25 Jan 2013 04:05:51 GMT
+	Server: Apache-Coyote/1.1
+	Content-Type: application/json
+	Connection: close
+	Transfer-Encoding: chunked
+	
+	{"id":1,"todo":"Sell a lot of OpenShift Enterprise","tags":["javascript","ui"],"createdOn":1359086546955}
+	
+
+##**Extra Credit**
+
+SSH into the application gear and verify the todo item was added to the PostgreSQL database.
+
+
+**Lab 28 Complete!**
+<!--BREAK-->
+
+#**Lab XX: Using quickstarts (Estimated time: 10 minutes)**
+
+
+**Server used:**
+
+* localhost
+
+**Tools used:**
+
+* rhc
+* git
+
+A key tenant when Red Hat was designing OpenShift Enterprise was the ability for developers to be able to run their source code and application as is, without having to use proprietary API(s).  To illustrate how easy it is for developers to get their existing application deployed on OpenShift Enterprise,  the team has created a github space where they provide numerous quick start projects that make deploying common open source applications to the platform a painless process.  Some of the popular open source projects the team provides a quick start for are:
+
+* Drupal
+* Review Board
+* Wordpress
+* Frog CMS
+* Sugar CRM
+* Redmine
+* MediaWiki
+
+##**Install a quickstart**
+
+Point your browser to the following URL:
+
+	http://www.github.com/openshift
+	
+Given the number of available quick starts, you may have to use the search functionality of your browser to locate the quick start you would like to install.  For this lab, choose either Wordpress or Drupal and follow the instructions provided after selecting the quick start to install the application.
+
+![](http://training.runcloudrun.com/images/quickstart.png)
+
+**Lab XX Complete!**
+<!--BREAK-->
+
+
 #**Appendix A - Troubleshooting**
 
 ##**Diagnostics script**
 
-Installing and configuring an OpenShift Enterprise PaaS can often fail due to simple mistakes in configuration files.  Fortunately,  the team provides an unsupported troubleshooting script that can diagnose most problems with an installation.  This script is located on the lab support website and is called *oo-diagnostics*.  For this lab, running the version provided on the support website should suit your needs but when helping customers out, I suggest you pull the script from the official GitHub repository to ensure that you have most updated version.  The GitHub script can is located at:
+Installing and configuring an OpenShift Enterprise PaaS can often fail due to simple mistakes in configuration files.  Fortunately,  the team provides an unsupported troubleshooting script that can diagnose most problems with an installation.  This script is located on the lab support website and is called *oo-diagnostics*.  For this lab, running the version provided on the support website should suit your needs but when helping customers out, I suggest you pull the script from the official github repository to ensure that you have most updated version.  The github script can is located at:
 
 	https://raw.github.com/openshift/origin-server/master/util/oo-diagnostics
 	
@@ -2931,6 +3635,3 @@ The above commands will stop the users application and them remove the applicati
 #**Appendix B - RHC command line reference**
 
 <!--BREAK-->
-
-
-

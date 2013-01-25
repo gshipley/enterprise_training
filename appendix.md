@@ -1,3 +1,40 @@
+
+#**Lab XX: Using quickstarts (Estimated time: 10 minutes)**
+
+
+**Server used:**
+
+* localhost
+
+**Tools used:**
+
+* rhc
+* git
+
+A key tenant when Red Hat was designing OpenShift Enterprise was the ability for developers to be able to run their source code and application as is, without having to use proprietary API(s).  To illustrate how easy it is for developers to get their existing application deployed on OpenShift Enterprise,  the team has created a github space where they provide numerous quick start projects that make deploying common open source applications to the platform a painless process.  Some of the popular open source projects the team provides a quick start for are:
+
+* Drupal
+* Review Board
+* Wordpress
+* Frog CMS
+* Sugar CRM
+* Redmine
+* MediaWiki
+
+##**Install a quickstart**
+
+Point your browser to the following URL:
+
+	http://www.github.com/openshift
+	
+Given the number of available quick starts, you may have to use the search functionality of your browser to locate the quick start you would like to install.  For this lab, choose either Wordpress or Drupal and follow the instructions provided after selecting the quick start to install the application.
+
+![](http://training.runcloudrun.com/images/quickstart.png)
+
+**Lab XX Complete!**
+<!--BREAK-->
+
+
 #**Appendix A - Troubleshooting**
 
 ##**Diagnostics script**
