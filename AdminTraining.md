@@ -1,9 +1,47 @@
 Title:  OpenShift Enterprise Training - Lab Manual
 Author: Grant Shipley  
 Date:   Jan, 2013
-* Email: gshipley@redhat.com
+
+#**Contents**#
+
+1. **Overview of OpenShift Enterprise**
+
+2. **Registering and updating the operating system**
+3. **Installing and configuring DNS**
+4. **Configuring the DHCP client and hostname**
+5. **Installing and configuring MongoDB**
+6. **Installing and configuring ActiveMQ**
+7. **Installing and configuring the MCollective client**
+8. **Installing and configuring the broker application**
+9. **Configuring the broker plugins and MongoDB user accounts**
+10. **Installing the OpenShift Enterprise Web Console**
+11. **Configuring DNS resolution for the node host**
+12. **Setting up MCollective on the node host**
+13. **Installing and configuring the OpenShift Enterprise node packages**
+14. **Configuring PAM namespace module, Linux control groups (cgroups), and user quotas**
+15. **Configuring SELinux and System Control Settings**
+16. **Configuring SSH, OpenShift Port Proxy, and node configuration**
+17. **Configuring local machine for DNS resolution**
+18. **Adding cartridges**
+19. **Managing resources**
+20. **Managing districts**
+21. **Installing the RHC client tools**
+22. **Using *rhc setup***
+23. **Creating a PHP application**
+24. **Managing an application**
+25. **Using cartridges**
+26. **Using the web console to create applications**
+27. **Scaling an application**
+28. **The DIY application type**
+29. **Java EE applications using JBoss EAP**
+30. **Using Jenkins continuous integration**
+31. **Using JBoss Tools**
+32. **Using quickstarts**
+33. **Creating a quick start**
+34. **Appendix**
 
 <!--BREAK-->
+
 #**1.0 Overview of OpenShift Enterprise**
 
 ##**1.1 Assumptions**
@@ -4012,7 +4050,140 @@ Given the number of available quick starts, you may have to use the search funct
 
 **Lab 31 Complete!**
 <!--BREAK-->
+**Lab 32: Creating a quick start (Estimated time: 30 minutes)**
 
+
+**Server used:**
+
+* localhost
+* node host
+
+**Tools used:**
+
+* rhc
+* git
+* github
+
+A common task that you will probably be asked to do is make a software developers development environment easily deployable on OpenShift Enterprise.  Development teams desire a quick and repeatable way to spin up an environment with their application code already deployed and integrated with various data stores.  In the previous lab, we saw how easy it was to install application via our quick start process.  During this lab, we will focus on the ability for you to create your own quick starts using the popular open source project Piwik.
+
+##**Download the Piwik source code**
+
+At the time of this writing, you can obtain the code directly from the Piwik website at: http://piwik.org/latest.zip.  Once downloaded, save the file to *~/code/piwikstage*.
+
+After you have downloaded the source code, extract the contents of the zip archive with the following command:
+
+    $ cd ~
+    $ mkdir code
+    $ mkdir piwikstage
+    $ unzip latest.zip
+    
+This will create a piwik directory under the ~/code/piwikstage directory.  
+
+##**Create an OpenShift Enterprise application**
+
+We need to create an OpenShift Enterprise application to hold the source code as well as embed the MySQL database.
+   
+     $ cd ~/code
+    $ rhc app create-a piwik -t php
+    $ rhc cartridge add -a piwik -c mysql
+    
+OpenShift Enterprise, as you know, creates a default *index* file for your application.  Because we are going to be using the source code from our Piwik applicaiton, we need to remove the existing template.
+
+	$ rm -rf ~/code/piwik/php/*
+	
+At this point, we need to copy over the source code that we extracted from the zip archive to our *piwik* OpenShift Enterprise applciation.
+
+	$ cp –av ~/code/piwikstage/piwik/* ~/code/piwik/php
+	
+Now we need to add and commit our changes to our *piwik* applicaiton:
+
+	$ cd ~/code/piwik/php
+    $ git add .
+    $ git commit –am “Initial commit for Piwik”
+    $ git push
+    
+Assuming everything went as expected, you should be able to verify Piwik is running by opening up your web browser and pointing to the following URL:
+
+	http://piwik-ose.example.com
+	
+![](http://training.runcloudrun.com/images/piwik.png)	    
+
+##**Create github repository**
+
+**Note**: This step assumes that you already have a github account.  If you don’t, head on over to www.github.com and sign up (It’s free).
+   
+Log in to the github website and create a new repository for our quick start.  The direct link, after you are logged in, to create a new repository is:
+	
+	https://github.com/repositories/new
+		
+Enter a project name and a description for your quick start.  I suggest a name that identifies the project as a OpenShift Enterprise quick start.  For example, a good name would be *Piwik-openshift-quickstart*.
+
+![](http://training.runcloudrun.com/images/piwik2.png)
+
+On your newly created project space, grab the HTTP git URL and add the github repository as a remote to your existing *piwik* OpenShift Enterprise application.	    	
+
+![](http://training.runcloudrun.com/images/piwik3.png)
+
+	$ cd ~/code/piwik
+	$ git remote add github ${github http URL from github}
+	
+##**Create deployment instructions**
+
+In order for developers to be able to use the quick start that you have created, you need to provide instructions for how to install the application.  These instructions need to be in the *README* and *README.md* files.  By default, github will display the contents of this file, using the markdown version if it exits, on the repository page.  For example, a proper README file would contain the following contents:
+
+Piwik on OpenShift
+=========================
+Piwik is a downloadable, open source (GPL licensed) real time web analytics software program. It provides you with detailed reports on your website visitors: the search engines and keywords they used, the language they speak, your popular pages, and so much more.
+
+Piwik aims to be an open source alternative to Google Analytics, and is already used on more than 150,000 websites. 
+
+More information can be found on the official Piwik website at http://piwik.org
+
+	Running on OpenShift
+	--------------------
+	
+	Create an account at http://openshift.redhat.com/
+	
+	Create a PHP application
+	
+		rhc app create -a piwik -t php-5.3 -l $USERNAME
+	
+	Add mysql support to your application
+	    
+		rhc cartridge add -a piwik -c mysql -l $USERNAME
+	Make a note of the username, password, and host name as you will need to use these to complete the Piwik installation on OpenShift
+	
+	Add this upstream Piwik quickstart repo
+	
+		cd piwik/php
+		rm -rf *
+		git remote add upstream -m master git://github.com/gshipley/piwik-openshift-quickstart.git
+		git pull -s recursive -X theirs upstream master
+	
+	Then push the repo upstream to OpenShift
+	
+		git push
+	
+	That's it, you can now checkout your application at:
+	
+		http://piwik-$yourlogin.rhcloud.com
+
+Create the *README* and *README.md* in the *~/code/piwik* directory and add the contents provided above.  Once you have created these files, add and commit them to your repository:
+
+	$ cd ~/code/piwik
+	$ git add .
+	$ git commit -am “Add installation instructions”
+	
+Now we need to push these changes to the github repository which is the main location of the quick start we are creating.
+
+	$ git push -u github master
+	
+##**Verify your quick start works**
+
+Delete the *piwik* OpenShift Enterprise application and follow the instruction you created for your Piwik quick start to verify that everything works as expected.  
+
+**Note:**  If your application requires an existing populated database, the way to accomplish this is by using the .openshift/action_hooks/build script located in your application directory.  Once you have your database created locally, do a mysqldump on the table and store the .sql file in the action_hooks directory.  You can then modify an existing build file to import the schema on application deployment.  For an example, take a look at the action_hooks directory of the Wordpress quick start.
+    
 
 #**Appendix A - Troubleshooting**
 
@@ -4065,11 +4236,58 @@ While trying to add a node to a district, a common error is that the node alread
 	
 The above commands will stop the users application and them remove the application from the node.  If you want to preserve the application data, you should backup the application first using the snapshot tool that is part of the RHC command line tools.
 
+**Lab 32 Complete!**
 <!--BREAK-->
+#**Appendix A - Troubleshooting**
 
-#**Appendix B - RHC command line reference**
+##**Diagnostics script**
 
-<!--BREAK-->
+Installing and configuring an OpenShift Enterprise PaaS can often fail due to simple mistakes in configuration files.  Fortunately,  the team provides an unsupported troubleshooting script that can diagnose most problems with an installation.  This script is located on the lab support website and is called *oo-diagnostics*.  For this lab, running the version provided on the support website should suit your needs but when helping customers out, I suggest you pull the script from the official github repository to ensure that you have most updated version.  The github script can is located at:
+
+	https://raw.github.com/openshift/origin-server/master/util/oo-diagnostics
+	
+This script can be run on any OpenShift Enterprise broker or node host.  Once you have the script downloaded, change the permission to enable execution of the script:
+
+	# chmod +x oo-diagnostics
+	
+To run the command and check for errors, issue the following command:
+
+	# ./oo-diagnostics -v
+	
+**Note:** Sometimes the script will fail at the first error and not continue processing.  In order to run a full check on your node, add the *--abortok* switch
+	
+	# ./oo-diagnostics -v --abortok
+	
+Under the covers, this script performs a lot of checks on your host as well as executing the existing *oo-accept-broker* and *oo-accept-node* commands on the respective host.
+
+##**Recovering failed nodes**
+
+A node host that fails catastrophically can be recovered if the gear directory /var/lib/openshift has been stored in a fault-tolerant way and can be recovered. In practice this scenario occurs rarely, especially when node hosts are virtual machines in a fault tolerant infrastructure rather than physical machines. 
+
+**Note: Do not start the MCollective service until you have completed the following steps.**
+
+Install a node host with the same hostname and IP address as the one that failed. The hostname DNS A record can be adjusted if the IP address must be different, but note that the application CNAME and database records all point to the hostname, and cannot be easily changed.
+
+Duplicate the old node host's configuration on the new node host, ensuring in particular that the gear profile is the same. 
+
+Mount */var/lib/openshift* from the original, failed node host. SELinux contexts must have been stored on the */var/lib/openshift* volume and should be maintained. 
+
+Recreate /etc/passwd entries for all the gears using the following steps:
+
+* Get the list of UUIDs from the directories in /var/lib/openshift.
+* Get the Unix UID and GID values from the group value of /var/lib/openshift/UUID.
+* Create the corresponding entries in /etc/passwd, using another node's /etc/passwd file for reference. 
+
+Reboot the new node host to activate all changes, start the gears, and allow MCollective and other services to run. 
+
+##**Removing applications from a node**
+
+While trying to add a node to a district, a common error is that the node already has user applications on it.  In order to be able to add this node to a district, you will either need to move these applications to another node or delete the applications.  In this training class, it is suggested that you simply delete the application as we are working in a single node host configuration.  In order to remove a users application, issue the following commands:
+
+	# oo-admin-ctl-app -l username -a appname -c stop
+	# oo-admin-ctl-app -l username -a appname -c destroy
+	
+The above commands will stop the users application and them remove the application from the node.  If you want to preserve the application data, you should backup the application first using the snapshot tool that is part of the RHC command line tools.
 
 
 
