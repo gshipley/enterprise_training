@@ -1478,28 +1478,28 @@ If you do not see the expected content, consult the troubleshooting section at t
 * text editor
 * networking tools
 
-At this point, we should have a complete OpenShift Enterprise installation working correctly on the lab machines that were provided to you by the instructor.  During the next portion of the training, we will be focussing on administration and usage of the OpenShift PaaS.  To make performing these tasks easier, it is suggested that you add the DNS server that we created in Lab 2 to be the first nameserver that your local machine uses to resolve hostnames.  The process for this varies depending on  operating system.  We will cover the configuration for both the Linux and Mac Operating systems.  If you are using a Microsoft Windows machine, consult the instructor for instructions on how to perform this lab.
+At this point, we should have a complete OpenShift Enterprise installation working correctly on the lab machines that were provided to you by the instructor.  During the next portion of the training, we will be focussing on administration and usage of the OpenShift Enterprise PaaS.  To make performing these tasks easier, it is suggested that you add the DNS server that we created in lab 2 to be the first nameserver that your local machine uses to resolve hostnames.  The process for this varies depending on the operating system.  This lab manual will cover the configuration for both the Linux and Mac operating systems.  If you are using a Microsoft Windows operating system, consult the instructor for instructions on how to perform this lab.
 
 ##**Configuring example.com resolution for Linux**
 
-If you are using Linux, the process for updating DNS is straightforward.  Simple edit the */etc/resolv.conf* configuration file and add the IP address of you broker node as the first entry.  For example, add the following at the top of the file, replacing the 10.x.x.x IP address with the correct one from your broker node.
+If you are using Linux, the process for updating your name server is straightforward.  Simply edit the */etc/resolv.conf* configuration file and add the IP address of your broker node as the first entry.  For example, add the following at the top of the file, replacing the 10.x.x.x IP address with the correct address of your broker node.
 
 	nameserver 10.4.59.x
 	
-Once you have added the above nameserver, you should be able to communicate with your OpenShift Enterprise PaaS by using the hostnames.  To test this out, ping the broker and node hosts from your local machine:
+Once you have added the above nameserver, you should be able to communicate with your OpenShift Enterprise PaaS by using the server hostname.  To test this out, ping the broker and node hosts from your local machine:
 
 	$ ping broker.example.com
 	$ ping node.example.com
 	
 ##**Configuring example.com resolution for OS X**
 	
-If you are using OSX, you will notice that the operating does indeed have a */etc/resolv.conf* configuration file.  However, the operating system does not respect this file and requires users to edit the DNS servers via the *System Preferences* tool.
+If you are using OSX, you will notice that the operating has a */etc/resolv.conf* configuration file.  However, the operating system does not respect this file and requires users to edit the DNS servers via the *System Preferences* tool.
 
 Open up the *System Preferences* tool and select the *Network* utility:
 
 ![](http://training.runcloudrun.com/images/network.png)
 
-In the bottom left hand corner of the *Network* utility, ensure that the lock is unlocked so that you can make changes to the configuration.  Once you have unlocked the system for changes, located the Ethernet device that is providing connectivity for your machine and click the advanced button:
+On the bottom left hand corner of the *Network* utility, ensure that the lock button is unlocked to enable user modifications to the DNS configuration.  Once you have unlocked the system for changes, locate the ethernet device that is providing connectivity for your machine and click the advanced button:
 
 ![](http://training.runcloudrun.com/images/network2.png)
 
@@ -1507,15 +1507,15 @@ Select the DNS tab at the top of the window:
 
 ![](http://training.runcloudrun.com/images/network3.png)
 
-**Note: Make a list of the current DNS servers that you have for your configuration.  When you add a new one, OSX removes the existing servers forcing you to add them back.**
+**Note:** Make a list of the current DNS servers that you have configured for your operating system.  When you add a new one, OSX removes the existing servers forcing you to add them back.
 
 Click the *+* button to add a new DNS server and enter the 10.4.59.x IP address of your broker host.
 
 ![](http://training.runcloudrun.com/images/network4.png)
 
-**Note: Add your existing nameservers back that you made a note of above.**
+**Note:** Add your existing nameservers back that you made a note of above.
 
-**Note: After this training class, remember to remove the DNS server for your broker host.**
+**Note:** After this training class, remember to remove the DNS server for your broker host.
 
 After you have applied the changes, we can now test that name resolution is working correctly.  To test this out, ping the broker and node hosts from your local machine:
 
@@ -1536,9 +1536,11 @@ After you have applied the changes, we can now test that name resolution is work
 * yum
 * bundle
 
-In production mode, Rails caches certain values for faster retrieval. Clearing this cache allows the retrieval of updated values.
+By default, OpenShift Enterprise caches certain values for faster retrieval. Clearing this cache allows the retrieval of updated settings.
 
-For example, the first time MCollective retrieves the list of cartridges available on your nodes, the list is cached so that subsequent requests for this information are processed more quickly. If you install a new cartridge, it is unavailable to users until the cache is cleared and MCollective retrieves a new list of cartridges. This lab will focus on installing cartridges to allow OpenShift Enterprise to create JBoss gears.
+For example, the first time MCollective retrieves the list of cartridges available on your nodes, the list is cached so that subsequent requests for this information are processed more quickly. If you install a new cartridge, it is unavailable to users until the cache is cleared and MCollective retrieves a new list of cartridges. 
+
+This lab will focus on installing cartridges to allow OpenShift Enterprise to create JBoss gears.
 
 ##**Listing available cartridges for your subscription**
 
@@ -1567,9 +1569,9 @@ During this lab, you should see the following cartridges available to install:
 
 ##**Installing JBoss support**
 
-In order to enable consumers of the PaaS to be able to create JBoss gears, we will need to install all the necessary cartridges for the application server and supporting build systems.  Perform the following command to install the required cartridges:
+In order to enable consumers of the PaaS to create JBoss gears, we will need to install all of the necessary cartridges for the application server and supporting build systems.  Perform the following command to install the required cartridges:
 
-**Note: Execute the following on the node host.**
+**Note:** Execute the following on the node host.
 
 	# yum install openshift-origin-cartridge-jbosseap-6.0.noarch openshift-origin-cartridge-jbossews-1.0.noarch openshift-origin-cartridge-jenkins–1.4.noarch openshift-origin-cartridge-jenkins-client–1.4.noarch
 	
@@ -1577,35 +1579,35 @@ The above command will allow users to create JBoss EAP and JBoss EWS gears.  We 
 
 **Note:** Depending on your connection and speed of your node host, this installation make take several minutes.  
 
-##**Clearing broker application cache**
+##**Clearing the broker application cache**
 
 At this point, you will notice that if you try to create a JBoss based application via the web console, that the application type is not available.  This is because the broker host creates a cache of available gear types to increase performance.  After adding a new cartridge, you need to clear this cache in order for the new gear type to be available to users.
 
-**Note: Execute the following on the broker host.**
+**Note:** Execute the following on the broker host.
 
 	# cd /var/www/openshift/broker
 	# bundle exec rake tmp:clear
 	
-The cache can take several minutes to clear before you see the new cartridges available via the web console.
+It may take several minutes before you see the new cartridges available on the web console as it takes a few minutes for the cache to completely clear.
 
 ##**Testing new cartridges**
 
-Given the steps in Lab 16 during Part 1 of this training, you should be able to access the web console from a web browser on your local machine.  Open up your preferred browser and enter the following URL:
+Given the steps in lab 16 of this training, you should be able to access the web console from a web browser using your local machine.  Open up your preferred browser and enter the following URL:
 
 	http://broker.example.com
 	
-You will be prompted to authenticate, if you haven’t already and then be presented with an application creation screen.  After the cache has been cleared, and assuming you have added the new cartridges correctly, you should see a screen similar to the following:
+You will be prompted to authenticate and then be presented with an application creation screen.  After the cache has been cleared, and assuming you have added the new cartridges correctly, you should see a screen similar to the following:
 
 ![](http://training.runcloudrun.com/images/console-jboss.png)
 
-If you do not see the new cartridges available on the web console, check that the new cartridges are available by checking the contents of the */usr/libexec/openshift/cartridges* directory:
+If you do not see the new cartridges available on the web console, check that the new cartridges are available by viewing the contents of the */usr/libexec/openshift/cartridges* directory:
 
 	# cd /usr/libexec/openshift/cartridges
 	# ls
 	
 ##**Installing the PostgreSQL and DIY cartridges**
 
-Using the knowledge that you have learned in this lab, perform the necessary command to install both the PostgreSQL and DIY cartridges on your node host.  Verify the success of the installation by ensuring that the DIY application type is available via the web console:
+Using the knowledge that you have gained during in this lab, perform the necessary commands to install both the PostgreSQL and DIY cartridges on your node host.  Verify the success of the installation by ensuring that the DIY application type is available on the web console:
 
 ![](http://training.runcloudrun.com/images/console-diy.png)
 
@@ -1626,11 +1628,17 @@ Using the knowledge that you have learned in this lab, perform the necessary com
 
 ##**Setting default gear quotas and sizes**
 
-A users default gear size and quota is specified in the */etc/openshift/broker.conf* configuration file located on the broker host.  The *VALID_GEAR_SIZES* setting is not applied to users but specifies the gear sizes that the current OpenShift Enterprise PaaS installation supports.  The *DEFAULT_MAX_GEARS* settings specifies the number of gears to assign to all users upon user creation.  This is the total number of gears that a user can create by default.  The *DEFAULT_GEAR_SIZE* setting is the size of gear that a newly created user has access to.
+A users default gear size and quota is specified in the */etc/openshift/broker.conf* configuration file located on the broker host.  
 
-Take a look at the   */etc/openshift/broker.conf* configuration file to determine the current settings for your installation:
+The *VALID_GEAR_SIZES* setting is not applied to users but specifies the gear sizes that the current OpenShift Enterprise PaaS installation supports. 
 
-**Note: Execute the following on the broker host.**
+The *DEFAULT_MAX_GEARS* settings specifies the number of gears to assign to all users upon user creation.  This is the total number of gears that a user can create by default.  
+
+The *DEFAULT_GEAR_SIZE* setting is the size of gear that a newly created user has access to.
+
+Take a look at the  */etc/openshift/broker.conf* configuration file to determine the current settings for your installation:
+
+**Note:** Execute the following on the broker host.
 
 	# cat /etc/openshift/broker.conf
 
@@ -1640,22 +1648,22 @@ When changing the */etc/openshift/broker.conf* configuration file, keep in mind 
 
 ##**Setting the number of gears a specific user can create**
 
-There are often times when you want to increase or decrease the number of gears a particular users to consume without modifying the setting that is applied to all users.  OpenShift Enterprise provides a command that will provide the functionality to set per user settings.  To see all of the available options that can be performed on a specific user, enter the following command:
+There are often times when you want to increase or decrease the number of gears a particular user can consume without modifying the setting for all existing users.  OpenShift Enterprise provides a command that will allow the administrator to configure settings for an individual user.  To see all of the available options that can be performed on a specific user, enter the following command:
 
 	# oo-admin-ctl-user
 	
-To see how many gears that our *demo* has consumed as well as how many the *demo* user has access to create, you can provide the following switches to the *oo-admin-ctl-user* command:
+To see how many gears that our *demo* user has consumed as well as how many gears the *demo* user has access to create, you can provide the following switches to the *oo-admin-ctl-user* command:
 
 	# oo-admin-ctl-user -l demo
 	
-Given our current configuration for this training class, you should see the following output:
+Given the current state of our configuration for this training class, you should see the following output:
 	
 	User demo:
       	consumed gears: 0
         max gears: 100
         gear sizes: small
         
-In order to change the number of gears that our *demo* has permission to create, you can pass a --setmaxgears switch to the command.  For instance, if we only want to allow the *demo* to be able to create 25 gear, we would use the following command:
+In order to change the number of gears that our *demo* user has permission to create, you can pass the —setmaxgears switch to the command.  For instance, if we only want to allow the *demo* user to be able to create 25 gears, we would use the following command:
 
 	# oo-admin-ctl-user -l demo --setmaxgears 25
 	
@@ -1669,7 +1677,7 @@ After entering the above command, you should see the following output:
       
 ##**Setting the type of gears a specific user can create**
 
-In a production environment, a customer will typically have different sizes of gear types that are available for a user to consume.  For this lab, we will only create small gears.  However, to add the ability to create medium size gears to the *demo* user, you can pass the -addgearsize to the *oo-admin-ctl-user* command.  
+In a production environment, a customer will typically have different gear sizes that are available for developers to consume.  For this lab, we will only create small gears.  However, to add the ability to create medium size gears for the *demo* user, you can pass the -addgearsize switch to the *oo-admin-ctl-user* command.  
 
 	# oo-admin-ctl-user -l demo --addgearsize medium
 
@@ -1681,7 +1689,7 @@ After entering the above command, you should see the following output:
       max gears: 25
       gear sizes: small, medium
       
-In order to remove the ability for a user to create a specific gear size, you can use the --removegearsize parameter:
+In order to remove the ability for a user to create a specific gear size, you can use the --removegearsize switch:
 
 	# oo-admin-ctl-user -l demo --removegearsize medium
 	
@@ -1709,16 +1717,16 @@ This means, for example, that developers who hard-code environment settings into
 
 ##**Enabling districts**
 
-To use districts, the broker MCollective plugin must be configured to enable districts as it is responsible for communicating with node hosts regarding gears.  Edit the */etc/openshift/plugins.d/openshift-origin-msg-broker-mcollective.conf* configuration file and confirm the following parameters are set:
+To use districts, the broker’s MCollective plugin must be configured to enable districts.  Edit the */etc/openshift/plugins.d/openshift-origin-msg-broker-mcollective.conf* configuration file and confirm the following parameters are set:
 
-**Note: Execute the following on the broker host.**
+**Note:** Execute the following on the broker host.
 
 	DISTRICTS_ENABLED=true
 	NODE_PROFILE_ENABLED=true
 
 ##**Creating and populating districts**
 
-To create a district that will support a gear type of small, we will use the *oo-admin-ctl-district* command.  After defining the district, we can add our node host (node.example.com) as the only node in that district.  Execute the following commands to create a district named small_district that can hold *small* gear types:
+To create a district that will support a gear type of small, we will use the *oo-admin-ctl-district* command.  After defining the district, we can add our node host (node.example.com) as the only node in that district.  Execute the following commands to create a district named small_district which can only hold *small* gear types:
 
 **Note: Execute the following on the broker host.**
 
@@ -1740,16 +1748,16 @@ If the command was successful, you should see output similar to the following:
 	 "available_uids"=>"<6000 uids hidden>",
 	 "available_capacity"=>6000}
 
-If you are familiar with JSON, you will understand the format of this output.  What actually happened is a new document was created in the MongoDB NoSQL Database that we installed in a previous lab.  To view this document inside of the database, execute the following:
+If you are familiar with JSON, you will understand the format of this output.  What actually happened is a new document was created in the MongoDB database that we installed in a previous lab.  To view this document inside of the database, execute the following:
 
 	# mongo
 
-This will drop you into the mongo shell where we can perform command against the database.  The first thing we need to do is let MongoDB know which database we want to use:
+This will drop you into the mongo shell where you can perform commands against the database.  The first thing we need to do is let MongoDB know which database we want to use:
 
 	> show dbs
 	> use openshift_broker_dev
 	
-To list all of the available collections in the *openshift_broker_dev* database, you can issue the following:
+To list all of the available collections in the *openshift_broker_dev* database, you can issue the following command:
  
 	> db.getCollectionNames()
 	
@@ -1757,7 +1765,7 @@ You should see the following collections returned:
 
 	[ "district", "system.indexes", "system.users", "user" ]
 	
-We can now query the *district* collection to verify the creation:
+We can now query the *district* collection to verify the creation of our small district:
 
 	> db.district.find()
 	
@@ -1768,7 +1776,7 @@ The output should be:
 	"2013-01-15T17:18:28-05:00", "max_capacity" : 6000, "server_identities" : [ ], "uuid" : 
 	"513b50508f9f44aeb90090f19d2fd940", "available_uids" : [ 	1000, .........], , "available_capacity" : 6000 }
 
-**Note: The *server_identities* array does not contain any data yet.**
+**Note:** The *server_identities* array does not contain any data yet.
 
 Now we can add our node host, node.example.com, to the *small_district* that we created above:
 
@@ -1792,19 +1800,19 @@ You should see the following output:
 	 
 **Note:** If you see an error message indicating that you can’t add this node to the district because the node already has applications on it, consult the troubleshooting section.
 
-Repeat the steps above to query the database for information about districts.  Notice that the *server_identities* now contains the following information:
+Repeat the steps above to query the database for information about districts.  Notice that the *server_identities* array now contains the following information:
 
 	"server_identities" : [ { "name" : "node.example.com", "active" : true } ]
 	
-If you continued to add additional nodes to this district, the *server_identities* array would show all the node hosts that are assigned to this district.
+If you continued to add additional nodes to this district, the *server_identities* array would show all the node hosts that are assigned to the district.
 
-OpenShift Enterprise always provides a command line tool to display information about a district.  Simple enter the following command to view the JSON information that is stored in the MongoDB database:
+OpenShift Enterprise also provides a command line tool to display information about a district.  Simple enter the following command to view the JSON information that is stored in the MongoDB database:
 
 	# oo-admin-ctl-district
 
 ##**Managing district capacity**
 
-Districts and node hosts both have a configured capacity for gears. For a node host, the default values configured in */etc/openshift/resource_limits.conf*  are: 
+Districts and node hosts have a configured capacity for the number of gears allowed. For a node host, the default values configured in */etc/openshift/resource_limits.conf* are: 
 
 * Maximum number of application per node : 100
 * Maximum number of active applications per node : 100	
@@ -1827,9 +1835,9 @@ Districts and node hosts both have a configured capacity for gears. For a node h
 * gem
 * rhc
 
-The OpenShift Client tools known as **rhc** are built and packaged using the Ruby programming language. OpenShift integrates with the Git version control system to provide powerful, decentralized version control for your application source code.
+The OpenShift Client tools, known as **rhc**, are built and packaged using the Ruby programming language.  OpenShift Enterprise integrates with the Git version control system to provide powerful, decentralized version control for your application source code.
 
-OpenShift rhc can be run on any operating system with Ruby 1.8.7 or higher if you have the requisite user permissions to install programs. Instructions for specific operating systems are provided below. It is assumed that you are running the commands from a command line window, such as Command Prompt, or Terminal. If you are using Ruby Version Manager (rvm) see the instructions below.
+OpenShift Enterprise client tools can be installed on any operating system with Ruby 1.8.7 or higher.  Instructions for specific operating systems are provided below. It is assumed that you are running the commands from a command line window, such as Command Prompt, or Terminal. If you are using Ruby Version Manager (rvm) see the instructions below.
 
 ##**Microsoft Windows**
 
@@ -1837,9 +1845,9 @@ OpenShift rhc can be run on any operating system with Ruby 1.8.7 or higher if yo
 
 [RubyInstaller 1.9](http://rubyinstaller.org/) provides the best experience for installing Ruby on Windows XP, Vista, and Windows 7. Download the newest version from the [download page](http://rubyinstaller.org/downloads/) and launch the installer.
 
-**Important**: During the installation you can accept all of the defaults, but it is mandatory that you select the "Add Ruby executables to your PATH" check box in order to run Ruby from the command line.
+**Important**: During the installation you should accept all of the defaults, it is mandatory that you select the "Add Ruby executables to your PATH" check box in order to run Ruby from the command line.
 
-After the installation is completed, to verify that the installation is working run:
+After the installation is complete, to verify that the installation is working run:
 	
 	C:\Program Files\> ruby -e 'puts "Welcome to Ruby"'
 	Welcome to Ruby
@@ -1848,20 +1856,20 @@ If the 'Welcome to Ruby' message does not display, the Ruby executable may not h
 
 ###**Installing Git for Windows**
 
-The next step is to install [Git for Windows](http://msysgit.github.com/) so that you can synchronise your local application source and your OpenShift application. Git for Windows offers the easiest Git experience on the Windows operating system and is the recommended default - if you use another version of Git please ensure it can be executed from the command line and continue to the next section.
+The next step is to install [Git for Windows](http://msysgit.github.com/) so that you can synchronize your local application source and your OpenShift application. Git for Windows offers the easiest Git experience on the Windows operating system and is the recommended default - if you use another version of Git please ensure it can be executed from the command line and continue to the next section.
 
-Download and install the [latest version of Git for Windows](http://code.google.com/p/msysgit/downloads/list?q=full+installer+official+git). Ensure that Git is added to your PATH so that it can be run from the command line. After the installation is completed, to verify that Git is correctly configured run:
+Download and install the [latest version of Git for Windows](http://code.google.com/p/msysgit/downloads/list?q=full+installer+official+git). Ensure that Git is added to your PATH so that it can be run from the command line. After the installation has completed, verify that Git is correctly configured by runing:
 
 	C:\Program Files\> git --version
 	git version 1.7.11.msysgit.1
 
 ###**Installing RHC for Windows**
 
-After Ruby and Git are correctly installed, use the RubyGems package manager (included in Ruby) to install the OpenShift client tools. Run:
+After Ruby and Git are correctly installed, use the RubyGems package manager (included in Ruby) to install the OpenShift Enterprise client tools. Run:
 
 	C:\Program Files\> gem install rhc
 
-RubyGems downloads and installs the rhc gem from www.rubygems.org/gems/rhc. The installation typically proceeds without errors. After installation is complete, run:
+RubyGems downloads and installs the rhc gem from www.rubygems.org/gems/rhc. The installation typically proceeds without errors. After the installation has completed, run:
 
 	C:\Program Files\> rhc
 
@@ -1876,7 +1884,6 @@ To verify that Ruby is correctly installed run:
 	$ ruby -e 'puts "Welcome to Ruby"'
 	Welcome to Ruby
 	
-
 ###**Installing Git for OS X**
 
 There are a number of options on Mac OS X for Git. We recommend the Git for OS X installer - download and run the latest version of the dmg file on your system. To verify the [Git for OS X installation](http://code.google.com/p/git-osx-installer/), run:
@@ -1886,37 +1893,35 @@ There are a number of options on Mac OS X for Git. We recommend the Git for OS X
 
 ###**Installing RHC for OS X**
 
-With Ruby and Git installed, use the RubyGems library system to install and run the OpenShift gem. Run:
+With Ruby and Git installed, use the RubyGems library system to install and run the OpenShift Enterprise gem. Run:
 
 	$ sudo gem install rhc
 
-After the installation is complete, run:
+After the installation has completed, run:
 
 	$ rhc -v
 
 ##**Fedora 16 and 17**
 
-To install from yum on Fedora 16 and 17, run
+To install from yum on Fedora 16 and 17, run:
 
 	$ sudo yum install rubygem-rhc
 
-This installs Ruby, Git, and the other dependencies required to run the OpenShift client tools.
+This installs Ruby, Git, and the other dependencies required to run the OpenShift Enterprise client tools.
 
-After the OpenShift client tools are installed, run:
+After the OpenShift Enterprise client tools have been installed, run:
 
 	$ rhc -v
 
-To update the OpenShift client tools to the latest version provided by the OpenShift team outside of yum, run:
-
 ##**Red Hat Enterprise Linux 6.2 and 6.3**
 
-The most recent version of the OpenShift client tools is available as a RPM from the OpenShift hosted YUM repository. We recommend this version to remain up to date, although a version of the OpenShift client tools RPM is also available through EPEL.
+The most recent version of the OpenShift Enterprise client tools are available as a RPM from the OpenShift Enterprise hosted YUM repository. We recommend this version to remain up to date, although a version of the OpenShift Enterprise client tools RPM is also available through EPEL.
 
-To add the OpenShift YUM repository, download the repository file openshift.repo and move it to your **/etc/yum.repos.d/** directory.
+To add the OpenShift Enterprise YUM repository, download the repository file openshift.repo and move it to your **/etc/yum.repos.d/** directory.
 
 	$ sudo mv ~/openshift.repo /etc/yum.repos.d/
 
-In order to install the rubygems package the RHEL Optional channel must be enabled. This package is a dependency of OpenShift client tools. There are two ways of doing this from the command line.  If you are using the Certificate-Based RHN tooling, enter the following command:
+In order to install the rubygems package, the *RHEL Optional* channel must be enabled. There are two ways of doing this from the command line.  If you are using the Certificate-Based RHN tooling, enter the following command:
 
 	$ sudo yum-config-manager --enable rhel-6-server-optional-rpms   
 
@@ -1924,13 +1929,13 @@ If you are using RHN-Classic, enter the following command:
 
 	$ sudo rhn-channel --add -- channel=rhel-x86rhel-x86_64-server-optional-6
 
-With the repository in place, you can now install the OpenShift client tools. Run:
+With the repository in place, you can now install the OpenShift Enterprise client tools by running the following command:
 
 	$ sudo yum install rhc
 
 ##**Ubuntu**
 
-Use the apt-get command line package manager to install Ruby and Git before you install the OpenShift command line tools. Run:
+Use the apt-get command line package manager to install Ruby and Git before you install the OpenShift Enterprise command line tools. Run:
 
 	$ sudo apt-get install ruby-full rubygems git-core
 
@@ -1939,11 +1944,11 @@ After you install both Ruby and Git, verify they can be accessed via the command
 	$ ruby -e 'puts "Welcome to Ruby"'
 	$ git --version
 
-If either program is not available from the command line, please add them to your PATH.
+If either program is not available from the command line, please add them to your PATH environment variable.
 
-With Ruby and Git correctly installed, you can now use the RubyGems package manager to install the OpenShift client tools. From a command line, run:
+With Ruby and Git correctly installed, you can now use the RubyGems package manager to install the OpenShift Enterprise client tools. From a command line, run:
 
-	$ sudo gem install rhc`
+	$ sudo gem install rhc
 
 
 **Lab 20 Complete!**
@@ -1960,23 +1965,23 @@ With Ruby and Git correctly installed, you can now use the RubyGems package mana
 
 * rhc
 
-##**Configuring RHC tools**
+##**Configuring RHC setup**
 
-By default, the RHC command line tools will default to use the publicly hosted OpenShift environment.  Since we are using our own enterprise environment, we need to tell rhc to use our broker.example.com instead of openshift.com.  In order to accomplish this, the first thing we need to do is set our *LIBRA_SERVER* variable to point to our broker host and then run the *rhc setup* command:
+By default, the RHC command line tool will default to use the publicly hosted OpenShift environment.  Since we are using our own enterprise environment, we need to tell *rhc* to use our broker.example.com server instead of openshift.com.  In order to accomplish this, the first thing we need to do is set our *LIBRA_SERVER* variable to point to our broker host and then run the *rhc setup* command:
 
 	$ LIBRA_SERVER=broker.example.com rhc setup
 	
-Once you enter in the that command, you will be prompted for the username that you would like to connect with.  For this training class, use the *demo* user account that we created in a previous lab.  After providing the user that you would like to connect with, you will be prompted for the password for this user.
+Once you enter in that command, you will be prompted for the username that you would like to authenticate with.  For this training class, use the *demo* user account that we created in a previous lab.  After providing the username that you would like to connect with, you will be prompted for the password of the user account.
 
-The next step in the setup process is to create and upload an SSH key to the broker server.  The is required for pushing your source, via git, up to the OpenShift enterprise server.
+The next step in the setup process is to create and upload our SSH key to the broker server.  The is required for pushing your source code, via git, up to the OpenShift Enterprise server.
 
-Finally, you will be asked to create a namespace for the provided user account.  The namespace is a unique name per account which becomes part of your application url. It is also commonly referred to as the users domain. The namespace can be at most 16 character long and can contain only alphanumeric characters. There is currently a 1:1 relationship between usernames and namespaces.  For this lab, create the following namespace:
+Finally, you will be asked to create a namespace for the provided user account.  The namespace is a unique name which becomes part of your application URL. It is also commonly referred to as the users domain. The namespace can be at most 16 characters long and can only contain alphanumeric characters. There is currently a 1:1 relationship between usernames and namespaces.  For this lab, create the following namespace:
 
 	ose
 
 ##**Under the covers**
 
-The *rhc setup* tool is a convenient command line utility to ensure that the user is configured properly to create and manage applications from the command line.  After this command has run, an *.openshift* directory was created in the users home directory with some basic configuration items specified in the *express.conf* file.  The contents of that file are as follows:
+The *rhc setup* tool is a convenient command line utility to ensure that the users operating system is configured properly to create and manage applications from the command line.  After this command has been executed, a *.openshift* directory was created in the users home directory with some basic configuration items specified in the *express.conf* file.  The contents of that file are as follows:
 
 	# Default user login
 	default_rhlogin=‘demo’
@@ -1984,7 +1989,7 @@ The *rhc setup* tool is a convenient command line utility to ensure that the use
 	# Server API
 	libra_server = 'broker.example.com'
 	
-This information will be provided to the *rhc* command line tool for every command that is issued.  If you want to run commands as a different user that the one listed above, you can either change the default in this file or provide the *-l* switch to the command.
+This information will be provided to the *rhc* command line tool for every future command that is issued.  If you want to run commands as a different user than the one listed above, you can either change the default login in this file or provide the *-l* switch to the *rhc* command.
 
 
 **Lab 21 Complete!**
@@ -2001,7 +2006,7 @@ This information will be provided to the *rhc* command line tool for every comma
 
 * rhc
 
-In this lab, we are ready to start using OpenShift Enterprise to create our first application.  To create an application, we will be using the *rhc app* command.  In order to view all of the command available for the *rhc app* command, enter the following command:
+In this lab, we are ready to start using OpenShift Enterprise to create our first application.  To create an application, we will be using the *rhc app* command.  In order to view all of the swtich available for the *rhc app* command, enter the following command:
 
 	$ rhc app -h
 	
@@ -2031,13 +2036,13 @@ This will provide you with the following output:
   	-v, --version             Display version information
 
 
-##**Create new application**
+##**Create a new application**
 
-It is very easy to create an OpenShift Enterprise application using rhc. The command to create an application is *rhc app create* and it requires two mandatory arguments:
+It is very easy to create an OpenShift Enterprise application using *rhc*. The command to create an application is *rhc app create* and it requires two mandatory arguments:
 
-* **Application Name (-a or --app)** : The name of the application. Name can only contain alpha-numeric characters and at max contain only 32 characters.
+* **Application Name (-a or --app)** : The name of the application. The application name can only contain alpha-numeric characters and at max contain only 32 characters.
 
-* **Type (-t or --type)**: The type is used to specify which runtime to use.  
+* **Type (-t or --type)**: The type is used to specify which language runtime to use.  
 
 Create a directory to hold your OpenShift Enterprise code projects:
 
@@ -2097,18 +2102,18 @@ You should see the default template that OpenShift Enterprise uses for a new app
 
 ##**What just happened?**
 
-After you entered the command to create a new PHP application a lot of things happened under the covers:
+After you entered the command to create a new PHP application, a lot of things happened under the covers:
 
 * A request was made to the broker application host to create a new php application
-* A message was dropped using MCollective and ActiveMQ to find a node to handle the application creation request
-* The node host responded to the request and created an application / gear for you
+* A message was dropped using MCollective and ActiveMQ to find a node host to handle the application creation request
+* A node host responded to the request and created an application / gear for you
 * All SELinux and cgroup policies were enabled for your application gear
 * A userid was created for your application gear
-* A private git repository was created for you on the node host
+* A private git repository was created for your gear on the node host
 * The git repository was cloned on your local machine
 * BIND was updated on the broker host to include an entry for your application
 
-##**Understanding directory structure on node host**
+##**Understanding the directory structure on the node host**
 	
 It is important to understand the directory structure of each OpenShift Enterprise application gear.  For the PHP application that we just created, we can verify and examine the layout of the gear on the node host.  SSH to your node host and execute the following commands:
 
@@ -2119,7 +2124,7 @@ You will see output similar to the following:
 
 	e9e92282a16b49e7b78d69822ac53e1d
 	
-The above is the unique user id that was created for the newly created php gear.  Lets examine the contents of this gear by using the following command:
+The above is the unique user id that was created for your application gear.  Lets examine the contents of this gear by using the following commands:
 
 	# cd e9e92282a16b49e7b78d69822ac53e1d
 	# ls -al
@@ -2141,17 +2146,17 @@ You should see the following directories:
 	[root@node e9e92282a16b49e7b78d69822ac53e1d]# 
 
 
-During a previous lab, when we setup the *rhc* tools, our SSH key was uploaded to the server to enable us to authenticate to the system without having to provide a password.  The key we provided was actually appended to the *authorized_key* file.  To verify this, use the following command to view the contents of the file:
+During a previous lab, where we setup the *rhc* tools, our SSH key was uploaded to the server to enable us to authenticate to the system without having to provide a password.  The SSH key we provided was actually appended to the *authorized_key* file.  To verify this, use the following command to view the contents of the file:
 
 	# cat .ssh/authorized_keys
 	
 You will also notice the following three directories:
 
-* app-root - Contains your core application code and your data directory to store persistent data.
-* git - Your private git repository that was created upon application creation.
-* php-5.3 - The core php runtime and associated configuration files.  Your application is served from this directory.
+* app-root - Contains your core application code as well as your data directory where persistent data is stored.
+* git - Your private git repository that was created upon gear creation.
+* php-5.3 - The core PHP runtime and associated configuration files.  Your application is served from this directory.
 
-##**Understanding directory structure on localhost**
+##**Understanding directory structure on the localhost**
 
 When you created the PHP application using the *rhc app create* command, the private git repository that was created on your node host was cloned to your local machine.
 
@@ -2175,7 +2180,7 @@ You should see the following information:
 
 ###**.git directory**
 
-If you are not familiar with the git revision control system, this is the location all information about the git repositories that you will be interacting with.  For instance, to list all of the repositories that you are currently setup to use for this project, issue the following command:
+If you are not familiar with the git revision control system, this is where information about the git repositories that you will be interacting with is stored.  For instance, to list all of the repositories that you are currently setup to use for this project, issue the following command:
 
 	$ cat .git/config
 	
@@ -2203,7 +2208,7 @@ You should see the following information which specifies the URL for our reposit
 
 The .openshift directory is a hidden directory where a user can create action hooks, set markers, and create cron jobs.  
 
-Action hooks are scripts that are executed directly so that can be written in python, php, ruby, shell, etc.  OpenShift Enterprise supports the following action hooks:
+Action hooks are scripts that are executed directly so can be written in Python, PHP, Ruby, shell, etc.  OpenShift Enterprise supports the following action hooks:
 
 | Action Hook | Description|
 | :---------------  | :------------ |
@@ -2213,7 +2218,7 @@ Action hooks are scripts that are executed directly so that can be written in py
 | pre_build | Executed on your CI system if available.  Otherwise, executed before the build step | 
 [Action Hooks][section-mmd-tables-table1] 
 
-OpenShift Enterprise also supports the ability for a user to schedule job to executed based upon the familiar cron functionality of linux.  Any scripts or jobs added to the minutely, hourly, daily, weekly or monthly directories will be run on a scheduled basis (frequency is as indicated by the name of the directory) using run-parts.  OpenShift supports the following schedule for cron jobs:
+OpenShift Enterprise also supports the ability for a user to schedule jobs to executed based upon the familiar cron functionality of linux.  Any scripts or jobs added to the minutely, hourly, daily, weekly or monthly directories will be ran on a scheduled basis (frequency is as indicated by the name of the directory) using run-parts.  OpenShift supports the following schedule for cron jobs:
 
 * daily
 * hourly
@@ -2221,15 +2226,15 @@ OpenShift Enterprise also supports the ability for a user to schedule job to exe
 * monthly
 * weekly
 
-The markers directory will allow the user to specify to force a clean build or to hot deploy the application.
+The markers directory will allow the user to specify settings such as enabling hot deployments or which version of Java to use.
 
 ###**libs directory**
 
-The libs directory is a location that the developer can provide any dependencies that are not able to be deployed using the standard dependency resolution system for the runtime.  In the case of PHP, the standard convention that OpenShift Enterprise uses is by providing *PEAR* modules in the deptlist.txt file.
+The libs directory is a location where the developer can provide any dependencies that are not able to be deployed using the standard dependency resolution system for the selected runtime.  In the case of PHP, the standard convention that OpenShift Enterprise uses is providing *PEAR* modules in the deptlist.txt file.
 
 ###**misc directory**
 
-The misc directory is a located provided to the developer for a location to store any application code that they do not want exposed to site visitors.
+The misc directory is a location provided to the developer to store any application code that they do not want exposed publicly.
 
 ###**php directory**
 
@@ -2257,7 +2262,7 @@ Once the code has been changed, we need to commit our change to the local git re
 
 	$ git commit -am “Changed welcome message.”
 	
-Now that our code has been committed to our local repository, we need to need to push those changes up to our repository that is on the node host.  
+Now that our code has been committed to our local repository, we need to push those changes up to our repository that is located on the node host.  
 
 	$ git push
 	
@@ -2301,14 +2306,14 @@ You should see the updated code for the application.
 
 ##**Adding a new PHP file**
 
-To add a new source code file to your OpenShift Enterprise application is an easy and straightforward process.  For instance, if you wanted to create a PHP source code file that displays the server date and time, we create a new file located in *php* directory and name it *time.php*.  Go ahead and create this file and add the following contents:
+Adding a new source code file to your OpenShift Enterprise application is an easy and straightforward process.  For instance, to create a PHP source code file that displays the server date and time, create a new file located in *php* directory and name it *time.php*.  After creating this file, add the following contents:
 
 	<?php
 	// Print the date and time
 	echo date('l jS \of F Y h:i:s A');
 	?>
 
-Once you have created this file, the process for pushing the changes involve adding the file to your git repository, committing the change, and then pushing the change to your OpenShift Enterprise gear.
+Once you have saved this file, the process for pushing the changes involve adding the new file to your git repository, committing the change, and then pushing the code to your OpenShift Enterprise gear:
 
 	$ git add .
 	$ git commit -am “Adding time.php”
@@ -2316,7 +2321,7 @@ Once you have created this file, the process for pushing the changes involve add
 	
 ##**Verify code change**
 
-To verify that we have created the new PHP correctly, open up a web browser and enter the following URL:
+To verify that we have created and deployed the new PHP source file correctly, open up a web browser and enter the following URL:
 
 	http://firstphp-ose.example.com/time.php
 	
@@ -2326,7 +2331,7 @@ You should see the updated code for the application.
 
 ##**Enable *hot_deploy***
 
-If you are familiar with PHP, you will probably be wondering why we stop and start apache on each code deployment.  Fortunately, we provide a way for developers to signal to OpenShift Enterprise that they do not want us to restart the application runtime on each deployment.  This is accomplished by creating a hot_deploy marker in the correct directory.  Change the your application root directory, for example ~/code/ose/firstphp and issue the following command:
+If you are familiar with PHP, you will probably be wondering why we stop and start apache on each code deployment.  Fortunately, we provide a way for developers to signal to OpenShift Enterprise that they do not want us to restart the application runtime for each deployment.  This is accomplished by creating a hot_deploy marker in the correct directory.  Change to your application root directory, for example ~/code/ose/firstphp and issue the following commands:
 
 	$ touch .openshift/markers/hot_deploy
 	$ git add .
@@ -2361,8 +2366,7 @@ The two lines of importance are:
 	remote: Will add new hot deploy marker
 	remote: App will not be stopped due to presence of hot_deploy marker
 
-
-Adding a hot_deploy marker will significantly increase the speed of application deployments while developing the application.
+Adding a hot_deploy marker will significantly increase the speed of application deployments while developing an application.
 	
 **Lab 22 Complete!**
 <!--BREAK-->
@@ -2377,18 +2381,18 @@ Adding a hot_deploy marker will significantly increase the speed of application 
 
 * rhc
 
-## **Start/Stop/Restart OpenShift application**
+## **Start/Stop/Restart OpenShift Enterprise application**
 
-OpenShift provides commands to start,stop, and restart an application. If at any point in the future you decided that an application should be stopped for some maintenance or should not accept any request you can stop the application using the *rhc app stop* command. After making necessary maintenance tasks you can start the application again using the *rhc app start* command. 
+OpenShift Enterprise provides commands to start,stop, and restart an application. If at any point in the future you decided that an application should be stopped for some maintenance, you can stop the application using the *rhc app stop* command. After making necessary maintenance tasks you can start the application again using the *rhc app start* command. 
 
-To stop the application execute the command shown below.
+To stop an application execute the following command:
 
 	$ rhc app stop -a firstphp
 	
 	RESULT:
 	firstphp stopped
 
-Now if you make curl request to application url you will get 503
+Verify that your application has been stopped with the following *curl* command:
 
 	$ curl http://firstphp-ose.example.com/health
 	
@@ -2405,14 +2409,14 @@ Now if you make curl request to application url you will get 503
 	</body></html>
 
 
-To Start the application, execute the command shown below.
+To start the application back up, execute the following command:
 
 	$ rhc app start -a firstphp
 
 	RESULT:
 	firstphp started
 
-Now if you make curl request you will get 1 as response
+Verify that your application has been started with the following *curl* command:
 
 	$ curl http://firstphp-ose.example.com/health
 	
@@ -2427,9 +2431,9 @@ You can also stop and start the application in one command as shown below.
 	firstphp restarted
 
 
-##**View application details**
+##**Viewing application details**
 
-All the details about an application can be viewed by the *rhc app show* command. This command will list when the application was created, unique identifier of the application, git URL, SSH URL, and many other details as shown below:
+All of the details about an application can be viewed by the *rhc app show* command. This command will list when the application was created, unique identifier of the application, git URL, SSH URL, and other details as shown below:
 
 
 	$ rhc app show -a firstphp
@@ -2451,10 +2455,9 @@ All the details about an application can be viewed by the *rhc app show* command
     
 
 
-##**View application status**
+##**Viewing application status**
 
-The state of application gears can be viewed by passing *state* flag to the *rhc app show* command as shown below:
-
+The state of application gears can be viewed by passing the *state* switch to the *rhc app show* command as shown below:
 
 	rhc app show --state -a firstphp
 	Password: ****
@@ -2466,35 +2469,34 @@ The state of application gears can be viewed by passing *state* flag to the *rhc
 
 ##**Cleaning up an application**
 
-As users start developing an application and deploying changes to OpenShift Enterprise, the application will start consuming some of the available disk space that is part of their quota. The space is consumed by the git repository, log files, temp files, and unused application libraries. OpenShift provides a disk space cleanup tool to help users manage the application disk space. This command is also available under *rhc app* and performs the following functions:
+As users start developing an application and deploying changes to OpenShift Enterprise, the application will start consuming some of the available disk space that is part of their quota. This space is consumed by the git repository, log files, temp files, and unused application libraries. OpenShift Enterprise provides a disk space cleanup tool to help users manage the application disk space. This command is also available under *rhc app* and performs the following functions:
 
-* Runs the git gc command on the application's remote git repository
+* Runs the *git gc* command on the application's remote git repository
 * Clears the application's /tmp and log file directories. These are specified by the application's *OPENSHIFT_LOG_DIR** and *OPENSHIFT_TMP_DIR* environment variables.
-* Clears unused application libraries. This means that any library files previously installed by a git push command are removed.
+* Clears unused application libraries. This means that any library files previously installed by a *git push* command are removed.
 
-To clean up the disk run the command as shown below.
+To clean up the disk space on your application gear, run the following command:
 
 	$ rhc app tidy -a firstphp
 
 ##**SSH to application gear**
 
-OpenShift allows remote access to the application via the Secure Shell protocol (SSH). [Secure Shell (SSH)](http://en.wikipedia.org/wiki/Secure_Shell) is a network protocol for securely getting access to a remote computer. SSH uses RSA public key cryptography for both connection and authentication. SSH provides direct access to the command line of your application gear on the remote server. After you are logged in on the remote server you can use the command line to directly manage the server, check logs and test quick changes. OpenShift Enterprise uses SSH for :
+OpenShift allows remote access to the application gear by using the Secure Shell protocol (SSH). [Secure Shell (SSH)](http://en.wikipedia.org/wiki/Secure_Shell) is a network protocol for securely getting access to a remote computer.  SSH uses RSA public key cryptography for both the connection and authentication. SSH provides direct access to the command line of your application gear on the remote server. After you are logged in on the remote server, you can use the command line to directly manage the server, check logs and test quick changes. OpenShift Enterprise uses SSH for :
 
-* Performing Git operations.
-* Remote access your application gear.
+* Performing Git operations
+* Remote access your application gear
 
-The SSH keys were generated and uploaded to OpenShift Enterprise by rhc setup command we executed in a previous lab. You can verify that SSH keys are uploaded by logging into OpenShift Enterprise web console and clicking on the "My Account" tab as shown below.
+The SSH keys were generated and uploaded to OpenShift Enterprise by rhc setup command we executed in a previous lab. You can verify that SSH keys are uploaded by logging into the OpenShift Enterprise web console and clicking on the "My Account" tab as shown below.
 
 ![](http://training.runcloudrun.com/images/sshkeys.png)
 
-**Note:** If you don't see any entry under "Public Keys" then you can either upload the SSH keys by clicking on "Add a new key" or run the *rhc setup* command again. This will create an ssh keypair in <User.Hom>/.ssh folder if not present and upload to OpenShift server.
+**Note:** If you don't see an entry under "Public Keys" then you can either upload the SSH keys by clicking on "Add a new key" or run the *rhc setup* command again. This will create a SSH key pair in <User.Home>/.ssh folder and upload the public key to the OpenShift Enterprise server.
 
-After the SSH keys are uploaded, you can SSH into the application gear as shown below. SSH is installed by default on most UNIX like platforms such as Mac OS X and Linux. For windows, you can use [Putty](http://www.chiark.greenend.org.uk/~sgtatham/putty/). Instructions for installing Putty can be found [on the OpenShift website](https://openshift.redhat.com/community/page/install-and-setup-putty-ssh-client-for-windows). 
+After the SSH keys are uploaded, you can SSH into the application gear as shown below.  SSH is installed by default on most UNIX like platforms such as Mac OS X and Linux. For windows, you can use [Putty](http://www.chiark.greenend.org.uk/~sgtatham/putty/).  Instructions for installing Putty can be found [on the OpenShift website](https://openshift.redhat.com/community/page/install-and-setup-putty-ssh-client-for-windows). 
 
 	$ ssh UUID@appname-namespace.example.com
 
 You can get the SSH URL by running *rhc app show* command as shown below:
-
 
 	$ rhc app show -a firstphp
 	Password: ****
@@ -2513,7 +2515,7 @@ You can get the SSH URL by running *rhc app show* command as shown below:
 	  ==========
 	    php-5.3```
 
-Now you can ssh into the application gear using the SSH Url shown above
+Now you can ssh into the application gear using the SSH URL shown above:
 
 	$ ssh e9e92282a16b49e7b78d69822ac53e1d@firstphp-ose.example.com
 	
@@ -2542,7 +2544,7 @@ Now you can ssh into the application gear using the SSH Url shown above
 	
 
 
-You can also view all the commands available on the application gear shell by running help command as shown below.
+You can also view all of the commands available on the application gear shell by running the help command as shown below:
 
 	[firstphp-ose.example.com ~]\> help
 	Help menu: The following commands are available to help control your openshift
@@ -2563,8 +2565,7 @@ You can also view all the commands available on the application gear shell by ru
 	
 ##**Viewing log files for an application**
 
-Logs are very important when you want to find out why an error is happening or to check the health of your application. OpenShift Enterprise provides the *rhc tail* command to display the contents of your log files. To view all the options available for the *rhc tail* command, issue the following:
-
+Logs are very important when you want to find out why an error is happening or if you want to check the health of your application. OpenShift Enterprise provides the *rhc tail* command to display the contents of your log files. To view all the options available for the *rhc tail* command, issue the following:
 
 	$ rhc tail -h
 	Usage: rhc tail <application>
@@ -2590,7 +2591,7 @@ The log files are also available on the gear node host in the *php-5.3/logs* dir
 
 ##**Viewing disk quota for an application**
 
-In a previous lab, we configured the application gears to have a disk usage quota.  You can view the quota for your currently running gear by connection to the gear node host via SSH as discussed previously in this lab.  Once you are connected to your application gear, enter the following command:
+In a previous lab, we configured the application gears to have a disk usage quota.  You can view the quota of your currently running gear by connecting to the gear node host via SSH as discussed previously in this lab.  Once you are connected to your application gear, enter the following command:
 
 	$ quota -s
 	
@@ -2607,17 +2608,17 @@ To view how much disk space your gear is actually using, you can also enter in t
 
 ##**Adding a custom domain to an application**
 
-OpenShift Enterprise supports the use of custom domain names for an application.   For example, let's suppose we want to use http://www.somesupercooldomain.com domain name for the application *firstphp* we created in a previous lab. The first thing you need to do before setting up a custom domain name is to buy the domain name from domain registration provider.
+OpenShift Enterprise supports the use of custom domain names for an application.  For example, suppose we want to use http://www.somesupercooldomain.com domain name for the application *firstphp* we created in a previous lab. The first thing you need to do before setting up a custom domain name is to buy the domain name from domain registration provider.
 
-After buying the domain name, you have to add a [CName record](http://en.wikipedia.org/wiki/CNAME_record) in for the custom domain name.  Once you have created the CName record, you can let OpenShift Enterprise know about the CName by using the *alias* switch.
+After buying the domain name, you have to add a [CName record](http://en.wikipedia.org/wiki/CNAME_record) for the custom domain name.  Once you have created the CName record, you can let OpenShift Enterprise know about the CName by using the *rhc alias* command.
 
 	$ rhc alias add firstphp www.mycustomdomainname.com
 	
-Technically, what OpenShift Enterprise has done under the hoods is set up a Vhost in Apache to handle the custom URL.
+Technically, what OpenShift Enterprise has done under the hood is set up a Vhost in Apache to handle the custom URL.
 
 ##**Backing up an application**
 
-Use the *rhc snapshot save* command to create backups of your OpenShift Enterprise application. This command creates a gzipped tar file of your application and of any locally-created log and data files.  This snapshot is downloaded to your local machine. The directory structure that exists on the server is maintained in the tar file
+Use the *rhc snapshot save* command to create backups of your OpenShift Enterprise application. This command creates a gzipped tar file of your application and of any locally-created log and data files.  This snapshot is downloaded to your local machine and the directory structure that exists on the server is maintained in the downloaded archive.
 
 	$ rhc snapshot save -a firstphp
 	Password: ****
@@ -2631,16 +2632,14 @@ Use the *rhc snapshot save* command to create backups of your OpenShift Enterpri
 	RESULT:
 	Success
 
-After the command successfully finishes you will see a file named firstphp.tar.gz in the directory where you ran the command. The default filename for the snapshot is $Application_Name.tar.gz. You can override this path and filename with the -f or 
---filepath option.
+After the command successfully finishes you will see a file named firstphp.tar.gz in the directory where you executed the command. The default filename for the snapshot is $Application_Name.tar.gz. You can override this path and filename with the -f or --filepath option.
 
 **NOTE**: This command will stop your application for the duration of the backup process.
 
 
 ##**Deleting an application**
 
-You can delete an OpenShift Enterprise application by executing the *rhc app delete* command. This command deletes your application and all of its data on the OpenShift Enterprise server. This operation can not be undone so use it with caution. The command will prompt you if you are sure that you want to delete your application. Once you enter yes, the application and all of its data will be deleted. However, the application code on your local machine will remain untouched.
-
+You can delete an OpenShift Enterprise application by executing the *rhc app delete* command. This command deletes your application and all of its data on the OpenShift Enterprise server but leaves your local directory intact. This operation can not be undone so use it with caution. 
 
 	$ rhc app delete -a someAppToDelete
 	
@@ -2652,7 +2651,7 @@ You can delete an OpenShift Enterprise application by executing the *rhc app del
 	RESULT:
 	Application ‘someAppToDelete’ successfully deleted
 
-There is another variant of this command which does not require the user to confirm the deletion.  To use this variant, pass the *--confirm* flag.
+There is another variant of this command which does not require the user to confirm the delete opeartion.  To use this variant, pass the *--confirm* flag.
 
 	$ rhc app delete --confirm -a someAppToDelete
 	
@@ -2662,9 +2661,9 @@ There is another variant of this command which does not require the user to conf
 	Application 'someAppToDelete' successfully deleted
 
 
-##**Restoring Backup**
+##**Restoring a backup**
 
-Not only you can take a backup of an application but you can also restore a previously saved snapshot.  This form of the command restores the git repository, the application data directories and the log files found in the specified archive. When the restoration is complete, OpenShift Enterprise runs the deployment script on the newly restored repository, which completes the deployment process in the same way as if you had issued a git push command. To restore the snapshot, run the command shown below.
+Not only you can take a backup of an application but you can also restore a previously saved snapshot.  This form of the *rhc*command restores the git repository, as well as the application data directories and the log files found in the specified archive. When the restoration is complete, OpenShift Enterprise runs the deployment script on the newly restored repository.  To restore an application snapshot, run the following command:
 
 	$ rhc snapshot restore -a firstphp -f firstphp.tar.gz
 
@@ -2677,17 +2676,17 @@ Open up a web browser and point to the following URL:
 
 	http://firstphp-ose.example.com
 	
-If the restore process worked correctly, you should see the restored application running just as it was before the delete operating that you performed earlier in this lab.
+If the restore process worked correctly, you should see the restored application running just as it was before the delete operation that you performed earlier in this lab.
 
 ##**Viewing a thread dump of an application**
 
-**Note:** The following sections requires a Ruby or JBoss application type.  Since we have not created one yet in this class, read through the material below but don’t actually perform the commands until a later lab.
+**Note:** The following sections requires a Ruby or JBoss application type.  Since we have not created one yet in this class, read through the material below but don’t actually perform the commands at this time.
 
-You can trigger a thread dump for Ruby and JBoss applications using the *rhc threaddump* command. A thread dump is a snapshot of the state of all threads that are part of the runtime process.  If an application appears to have stalled or is running out of resources, a thread dump can help to reveal the state of the runtime, to identify what might be causing any issues and ultimately to help resolve the problem. To trigger a thread dump execute the following command:
+You can trigger a thread dump for Ruby and JBoss applications using the *rhc threaddump* command. A thread dump is a snapshot of the state of all threads that are part of the runtime process.  If an application appears to have stalled or is running out of resources, a thread dump can help reveal the state of the runtime, identify what might be causing any issues and ultimately to help resolve the problem. To trigger a thread dump execute the following command:
 
 	$ rhc threaddump -a ApplicationName
 	
-After running this command using JBoss or Ruby application, you will be given a log file that you can tail to view the details of the thread dump.  Issue the following command, substituting the correct log file:
+After running this command for a JBoss or Ruby application, you will be given a log file that you can view in order to the details of the thread dump.  Issue the following command, substituting the correct log file:
 
 	$ rhc tail ApplicationName -f ruby-1.9/logs/error_log-20130104-000000-EST -o '-n 250'
 
@@ -2708,12 +2707,11 @@ After running this command using JBoss or Ruby application, you will be given a 
 * git
 * PHP
 
-Cartridges provide the actual functionality necessary to run applications. Currently, there are several cartridges available to support different programming languages, databases, monitoring and management. Cartridges are designed to be extensible so the community can add support for any programming language, database or any management tool not supported by OpenShift Enterprise. Please refer to the documentation on how you can [write your own cartridge](https://openshift.redhat.com/community/wiki/introduction-to-cartridge-building).
+Cartridges provide the actual functionality necessary to run applications. Currently, there are several cartridges available to support different programming languages, databases, monitoring and management. Cartridges are designed to be extensible so the community can add support for any programming language, database or any management tool not officially supported by OpenShift Enterprise. Please refer to the official OpenShift Enterprise documentation for how you can [write your own cartridge](https://openshift.redhat.com/community/wiki/introduction-to-cartridge-building).
 
+##**Viewing available cartridges**
 
-##**Viewing available cartridge commands**
-
-To view all of the available command for working with cartridges on OpenShift Enterprise, enter the following command:
+To view all of the available commands for working with cartridges on OpenShift Enterprise, enter the following command:
 
 	$ rhc cartridge -h
 	
@@ -2731,7 +2729,7 @@ You should see the following output:
 
 ##**Add the MySQL cartridge**
 
-In order to use a cartridge, we need to embed into our existing application.  A common database for PHP developers is the MySQL database.  OpenShift Enterprise provides support for version 5.1 of this popular open source database.  To enable MySQL support for the *firstphp* application, issue the following command:
+In order to use a cartridge, we need to embed it into our existing application.  OpenShift Enterprise provides support for version 5.1 of this popular open source database.  To enable MySQL support for the *firstphp* application, issue the following command:
 
 	$ rhc cartridge add mysql -a firstphp
 	
@@ -2752,13 +2750,13 @@ You should see the following output:
 	
 ##**Using MySQL**
 
-Developers will typically interact with MySQL by using the mysql shell command on OpenShift Enterprise.  In order to use the mysql shell, use the information you learned in a previous lab and SSH to your application gear.  Once you have been authenticated, issue the following command:
+Developers will typically interact with MySQL by using the mysql shell command on OpenShift Enterprise.  In order to use the mysql shell, use the information you gained in a previous lab in order to SSH to your application gear.  Once you have been authenticated, issue the following command:
 
 	[firstphp-ose.example.com ~]\> mysql
 	
-You will notice that you did not have to authenticate.  This is because OpenShift Enterprise sets environment variables that contains the connection information for the MySQL database. 
+You will notice that you did not have to authenticate to the MySQL database.  This is because OpenShift Enterprise sets environment variables that contains the connection information for the database. 
 
-When embedding the MySQL database, OpenShift Enterprise creates a database based upon the application name.  That being said, the user has full permissions to create new databases inside of MySQL.  Let’s use the default database that was created for us and create a *users* tables:
+When embedding the MySQL database, OpenShift Enterprise creates a default database based upon the application name.  That being said, the user has full permissions to create new databases inside of MySQL.  Let’s use the default database that was created for us and create a *users* table:
 
 	mysql> use firstphp;
 	Database changed
@@ -2779,15 +2777,15 @@ Verify that the user record has been added by selecting all rows from the *users
 	+---------+---------------------+
 	1 row in set (0.00 sec)
 	
-To exit out of your MySQL session, simple enter the *exit* command:
+To exit out of the MySQL session, simple enter the *exit* command:
 
 	mysql> exit
 	
 ##**MySQL environment variables**
 
-As mentioned earlier in this lab, OpenShift Enterprise creates environment variables that contains the connection information for your MySQL database.  If a user forgets their connection information, they can always retrieve the authentication information by viewing these environment variables:
+As mentioned earlier in this lab, OpenShift Enterprise creates environment variables that contain the connection information for your MySQL database.  If a user forgets their connection information, they can always retrieve the authentication information by viewing these environment variables:
 
-**Note: Execute the following on the node host.**
+**Note:** Execute the following on the node host.
 
 	[firstphp-ose.example.com ~]\> env |grep MYSQL
 	
@@ -2807,13 +2805,13 @@ To view a list of all *OPENSHIFT* environment variables, you can use the followi
 
 ##**Viewing MySQL logs**
 
-Given the above information, you can see that the log file directory for MySQL is specified with the *OPENSHIFT_MYSQL_DB_LOG_DIR* environment variable.  To view these log files, simple use the tail command:
+Given the above information, you can see that the log file directory for MySQL is specified with the *OPENSHIFT_MYSQL_DB_LOG_DIR* environment variable.  To view these log files, simply use the tail command:
 
 	[firstphp-ose.example.com ~]\> tail -f $OPENSHIFT_MYSQL_DB_LOG_DIR/*
 	
-##**Connecting to MySQL cartridge from PHP**
+##**Connecting to the MySQL cartridge from PHP**
 
-Now that we have verified that our MySQL database has been created correctly, and have created a database table with some user information, let’s connect to the database from PHP to verify that our application code can communicate the newly embedded MySQL cartridge.  Create a new file in the *php* directory of your *firstphp* application named *dbtest.php*.  Add the following source code to the *dbtest.php* file:
+Now that we have verified that our MySQL database has been created correctly, and have created a database table with some user information, let’s connect to the database from PHP in order to verify that our application code can communicate to the newly embedded MySQL cartridge.  Create a new file in the *php* directory of your *firstphp* application named *dbtest.php*.  Add the following source code to the *dbtest.php* file:
 
 	<?php
 	$dbhost = getenv("OPENSHIFT_MYSQL_DB_HOST");
@@ -2849,11 +2847,11 @@ Once you have created the source file, add the file to your git repository, comm
 	$ git commit -am “Adding dbtest.php”
 	$ git push
 	
-After the code has been deployed to your application gear, open up a web browser and use the following URL:
+After the code has been deployed to your application gear, open up a web browser and enter the following URL:
 
 	http://firstphp-ose.example.com/dbtest.php
 	
-You should a screen with the following information:
+You should see a screen with the following information:
 
 	Connected to database.
 	1 gshipley@redhat.com 
@@ -2861,7 +2859,7 @@ You should a screen with the following information:
 	
 ##**Managing cartridges**
 
-OpenShift Enterprise provides the ability to embed multiple cartridges in an application.  For instance, even though we are using MySQL for our *firstphp* application, we could also embed the PostgreSQL database as well.  It may be useful to stop, restart, or even check the status of a cartridge.  To check the status of our MySQL database, use the following command:
+OpenShift Enterprise provides the ability to embed multiple cartridges in an application.  For instance, even though we are using MySQL for our *firstphp* application, we could also embed the cron cartridge as well.  It may be useful to stop, restart, or even check the status of a cartridge.  To check the status of our MySQL database, use the following command:
 
 	$ rhc cartridge status -a firstphp -c mysql
 	
@@ -2900,9 +2898,9 @@ The user will then be presented with the following output:
 	    
 ##**Using port forwarding**
 
-At this point, you may have noticed that the database cartridges are only accessible via a 127.x.x.x private address.  This ensures that only the application gear can communicate with the database.
+At this point, you may have noticed that the database cartridge is only accessible via a 127.x.x.x private address.  This ensures that only the application gear can communicate with the database.
 
-With OpenShift Enterprise port forwarding, developers can connect to remote services like databases with local client tools.  This allows the developer to focus on code without having to worry about the details of configuring complicated firewall rules or SSH tunnels. To connect to the MySQL database running on our OpenShift Enterprise gear, you have to first forward all the ports to your local machine. This can be done using the *rhc port-forward* command.  This command is a wrapper that configures ssh port forwarding. Once the command is issued, you should see a list of services that are being forwarded and the associated IP address and port to use for connections as shown below:
+With OpenShift Enterprise port forwarding, developers can connect to remote services with local client tools.  This allows the developer to focus on code without having to worry about the details of configuring complicated firewall rules or SSH tunnels. To connect to the MySQL database running on our OpenShift Enterprise gear, you have to first forward all the ports to your local machine. This can be done using the *rhc port-forward* command.  This command is a wrapper that configures SSH port forwarding. Once the command is executed, you should see a list of services that are being forwarded and the associated IP address and port to use for connections as shown below:
 
 	$ rhc port-forward -a firstphp
 	
@@ -2911,13 +2909,13 @@ With OpenShift Enterprise port forwarding, developers can connect to remote serv
 	Binding mysqld -> 127.11.144.1:3306...
 	Forwarding ports, use ctl + c to stop
 
-In the above snippet, you can see that mysql database which we added to the *firstphp* gear is forwarded to our local machine. If you open http://127.11.144.1:8080 in your browser you will see the application.
+In the above snippet, you can see that mysql database, which we added to the *firstphp* gear, is forwarded to our local machine. If you open http://127.11.144.1:8080 in your browser you will see the application.
 
 **Note:** At the time of this writing, there is an extra step to enable port forwarding on Mac OS X based systems.  You will need to create an alias on your loopback device for the IP address listed in output shown above.  
 
 	sudo ifconfig lo0 alias 127.11.144.1
 
-Now that you have your services forward, you can connect to them using your local client tools. To connect to the MySQL database running on the OpenShift Enterprise gear, run the *mysql* command as shown below:
+Now that you have your services forward, you can connect to them using local client tools. To connect to the MySQL database running on the OpenShift Enterprise gear, run the *mysql* command as shown below:
 
 	$ mysql -uadmin -p -h 127.11.144.1
 	
@@ -2939,9 +2937,9 @@ Now that you have your services forward, you can connect to them using your loca
 * OpenShift Enterprise web console
 * git
 
-OpenShift Enterprise provides users with multiple ways to create and management applications.  The platform provides command line tools, IDE integration, REST APIs, and a web console.  During this lab, we will explore the creation and management of application using the web console.
+OpenShift Enterprise provides users with multiple ways to create and manage applications.  The platform provides command line tools, IDE integration, REST APIs, and a web console.  During this lab, we will explore the creation and management of application using the web console.
 
-Having DNS resolution setup on your local machine, as discussed in lab 16, is crucial to completing this lab.
+Having DNS resolution setup on your local machine, as discussed in lab 16, is crucial in order to complete this lab.
 
 ##**Authenticate to the web console**
 
@@ -2953,7 +2951,7 @@ Once you enter the above URL, you will be asked to authenticate using basic auth
 
 ![](http://training.runcloudrun.com/images/consoleAuth.png)
 
-After entering in valid credentials, you will see the main OpenShift Enterprise web console dashboard:
+After entering in valid credentials, you will see the OpenShift Enterprise web console dashboard:
 
 ![](http://training.runcloudrun.com/images/consoleDashboard.png)
 
@@ -2965,7 +2963,7 @@ In order to create a new application using the web console, click on the *ADD AP
 
 ![](http://training.runcloudrun.com/images/php2.1.png)
 
-Once you have created the application, you will see a confirmation screen with some very important information:
+Once you have created the application, you will see a confirmation screen with some important information:
 
 * URL for your application
 * GIT repository URL
@@ -2977,7 +2975,7 @@ Once you have created the application, you will see a confirmation screen with s
 
 ##**Clone your application repository**
 
-Open up a command prompt and clone your application repository with the instructions provided.  Once you have a local copy of your application, make a small code change to the *index.php* and push your changes to your OpenShift Enterprise gear.
+Open up a command prompt and clone your application repository with the instructions provided on the web console.  Once you have a local copy of your application, make a small code change to the *index.php* and push your changes to your OpenShift Enterprise gear.
 
 Once you have made a code change, view your application in a web browser to ensure that the code was deployed correctly to your server.
 
@@ -2987,7 +2985,7 @@ Click on the *My Applications* tab at the top of the screen and then select the 
 
 ![](http://training.runcloudrun.com/images/php2.3.png)
 
-After clicking on the *Phptwo* application link, you will be presented with the management dashboard for that application.  On this page, you can view the GIT repository URL, add a cartridge, or delete the application.  We want to add the MySQL database to our application so click on the *ADD CARTRIDGE* button.
+After clicking on the *Phptwo* application link, you will be presented with the management dashboard for that application.  On this page, you can view the GIT repository URL, add a cartridge, or delete the application.  We want to add the MySQL database to our application.  To do this, click on the *ADD CARTRIDGE* button.
 
 ![](http://training.runcloudrun.com/images/php2.4.png)
 
@@ -2995,7 +2993,7 @@ On the next screen, select the MySQL 5.1 cartridge.
 
 ![](http://training.runcloudrun.com/images/php2.5.png)
 
-Once the MySQL database cartridge has been added to your application, the web console will display the confirmation screen which also contains the connection information for your database.
+Once the MySQL database cartridge has been added to your application, the web console will display a confirmation screen which contains the connection information for your database.
 
 ![](http://training.runcloudrun.com/images/php2.6.png)
 
@@ -3024,19 +3022,19 @@ Using information you learned in a previous lab, add a PHP file that tests the c
 * touch
 * pwd
 
-Application scaling enables your application to react to changes in traffic and automatically allocate the necessary resources to handle your current demand. The OpenShift Enterprise infrastructure monitors incoming web traffic and automatically brings copies of your web cartridge online to handle requests.
+Application scaling enables your application to react to changes in HTTP traffic and automatically allocate the necessary resources to handle the current demand. The OpenShift Enterprise infrastructure monitors incoming web traffic and automatically adds additional gear of your web cartridge online to handle requests.
 
 ##**How scaling works**
 
 If you create a non-scaled application, the web cartridge occupies only a single gear and all traffic is sent to that gear. When you create a scaled application, it consumes two gears; one for the high-availability proxy (HAProxy) itself, and one for your actual application. If you add other cartridges like PostgreSQL or MySQL to your application, they are installed on their own dedicated gears.
 
-The HAProxy cartridge sits between your application and the network and routes web traffic to your web cartridges. When traffic increases, HAProxy notifies the OpenShift Enterprise servers that it needs additional capacity. OpenShift checks that you have a free gear (out of your max number of gears) and then creates another copy of your web cartridge on that new gear. The code in the git repository is copied to each new gear, but the data directory begins empty. When the new cartridge copy starts it will invoke your build hooks and then the HAProxy will begin routing web requests to it. If you push a code change to your web application all of the running gears will get that update.
+The HAProxy cartridge sits between your application and the network and routes web traffic to your web cartridges. When traffic increases, HAProxy notifies the OpenShift Enterprise servers that it needs additional capacity. OpenShift checks that you have a free gear (out of your max number of gears) and then creates another copy of your web cartridge on that new gear. The code in the git repository is copied to each new gear, but the data directory begins empty. When the new cartridge copy starts it will invoke your build hooks and then HAProxy will begin routing web requests to it. If you push a code change to your web application all of the running gears will get that update.
 
 The algorithm for scaling up and scaling down is based on the number of concurrent requests to your application. OpenShift Enterprise allocates 10 connections per gear - if HAProxy sees that you're sustaining 90% of your peak capacity, it adds another gear. If your demand falls to 50% of your peak capacity for several minutes, HAProxy removes that gear. Simple!
 
-Because each cartridge is "shared-nothing", if you want to share data between cartridges you can use a database cartridge. Each of the gears created during scaling has access to the database and can read and write consistent data. As OpenShift Enterprise grows we anticipate adding more capabilities like shared storage, scaled databases, and shared caching. 
+Because each cartridge is "share-nothing", if you want to share data between web cartridges you can use a database cartridge. Each of the gears created during scaling has access to the database and can read and write consistent data. As OpenShift Enterprise grows we anticipate adding more capabilities like shared storage, scaled databases, and shared caching. 
 
-The OpenShift web console shows you how many gears are currently being consumed by your application. We have lots of great things coming for web application scaling, so stay tuned.
+The OpenShift Enterprise web console shows you how many gears are currently being consumed by your application. We have lots of great things coming for web application scaling, so stay tuned.
 
 ##**Create a scaled application**
 
@@ -3044,7 +3042,7 @@ In order to create a scaled application using the *rhc* command line tools, you 
 
 	$ rhc app create scaledapp -t php -s
 	
-After entering the above command, you should see output that specifies that you are using both the PHP and HAProxy cartridges:
+After executing the above command, you should see output that specifies that you are using both the PHP and HAProxy cartridges:
 
 	Password: ****
 	
@@ -3084,11 +3082,11 @@ After entering the above command, you should see output that specifies that you 
 	RESULT:
 	Application scaledapp was created.
 	
-Log in to the web console with your browser and click on the *scaledapp* application.  You will notice with looking at the gear details that it lists the number of gears that your application is currently using.
+Log in to the web console with your browser and click on the *scaledapp* application.  You will notice while looking at the gear details that it lists the number of gears that your application is currently using.
 
 ![](http://training.runcloudrun.com/images/scaledApp.png)
 
-##**Setting scaling strategy**
+##**Setting the scaling strategy**
 
 OpenShift Enterprise allows users the ability to set the minimum and maximum numbers of gears that an application can use to handle increased HTTP traffic.  This scaling strategy is exposed via the web console.  While on the application details screen, click the *Scaled up with HAProxy x2* button to change the default scaling rules.
 
@@ -3103,26 +3101,26 @@ There are often times when a developer will want to disable automatic scaling in
 
 OpenShift Enterprise supports this workflow by allowing users to manually add and remove gears for an application.  The instructions below describe how to disable the automatic scaling feature. It is assumed you have already created your scaled application as detailed in this lab and are at the root level directory for the application.
 
-* From your locally cloned Git repository, create a disable autoscaling marker, as shown in the example below:
+From your locally cloned Git repository, create a *disable autoscaling* marker, as shown in the example below:
 	
 	$ touch .openshift/markers/disable_auto_scaling
 	$ git add .
 	$ git commit -a “remove automatic scaling”
 	$ git push
 	
-To add a new gear to your application, ssh to your node host and enter the following command:
+To add a new gear to your application, SSH to your node host and enter the following command:
 
 	 $ add-gear -a [AppName] -u [AppUUID] -n [DomainName]
 	 
-In this lab, the application name is *scaledapp*, the application UUID is the username that you used to ssh in to the node host, and the domain name is *ose*.  Given that information, your command should looking similar to the following:
+In this lab, the application name is *scaledapp*, the application UUID is the username that you used to SSH to the node host, and the domain name is *ose*.  Given that information, your command should looking similar to the following:
 
 	[scaledapp-ose.example.com ~]\> add-gear -a scaledapp -u 1a6d471841d84e8aaf25222c4cdac278 -n ose
 	
-Verify that your new gear was added to the application by running the *rhc app show* command or by looking at the application details on the web console.
+Verify that your new gear was added to the application by running the *rhc app show* command or by looking at the application details on the web console:
 
 	$ rhc app show scaledapp
 	
-Once running the command, you should see the this application is now using three gears.
+After executing this command, you should see the application is now using three gears.
 
 	scaledapp @ http://scaledapp-ose.example.com/
 	=============================================
@@ -3148,7 +3146,7 @@ Just as we scaled up with the *add-gear* command, we can manually scale down wit
 
 	[scaledapp-ose.example.com ~]\> remove-gear -a scaledapp -u 1a6d471841d84e8aaf25222c4cdac278 -n ose
 	
-After removing the gear with the *remove-gear* command, verify that the application only contains two gears, HAProxy and a single runtime gear.
+After removing the gear with the *remove-gear* command, verify that the application only contains two gears, HAProxy and a single runtime gear:
 
 	$  rhc app show scaledapp
 	
@@ -3171,7 +3169,7 @@ After removing the gear with the *remove-gear* command, verify that the applicat
 
 ##**Viewing HAProxy information**
 
-OpenShift Enterprise provides a dashboard that will give users relevant information about the status of the HAProxy gear that is balancing and managing load between the application gears.  The dashboard provides visibility into metrics such as process id, uptime, system limits, current connections, and running tasks.  To view the HAProxy dashboard, open your web browser and enter the following URL:
+OpenShift Enterprise provides a dashboard that will give users relevant information about the status of the HAProxy gear that is balancing and managing load between the application gears.  This dashboard provides visibility into metrics such as process id, uptime, system limits, current connections, and running tasks.  To view the HAProxy dashboard, open your web browser and enter the following URL:
 
 	http://scaledapp-ose.example.com/haproxy-status/
 	
@@ -3191,46 +3189,46 @@ OpenShift Enterprise provides a dashboard that will give users relevant informat
 * rhc
 * git
 
-In addition to supporting Ruby, PHP, Perl, Python, and Java EE6, the OpenShift Enterprise environment supports the "Do it Yourself" or "DIY" application type. Using this application type, you can run just about any program that speaks HTTP.
+In addition to supporting Ruby, PHP, Perl, Python, and Java EE6, the OpenShift Enterprise environment supports the "Do it Yourself" or "DIY" application type. Using this application type, users can run just about any program that speaks HTTP.
 
-How this works is remarkably straightforward. The OpenShift Enterprise execution environment is a carefully secured Red Hat Enterprise Linux operating system on x64 systems. Thus, OpenShift can run any binary that will run on RHEL 6.3 x64.
+How this works is remarkably straightforward. The OpenShift Enterprise execution environment is a carefully secured Red Hat Enterprise Linux operating system on x64 systems. Thus, OpenShift Enterprise can run any binary that will run on RHEL 6.3 x64.
 
-The way that OpenShift Enterprise DIY runtimes interfaces your application to the outside world is by creating an HTTP proxy specified by the environment variables *OPENSHIFT_INTERNAL_IP* and *OPENSHIFT_INTERNAL_PORT*. All your application has to do is bind and listen on that address and port. HTTP requests will come into the OpenShift Enterprise environment, which will proxy those requests to your application. Your application will reply with HTTP responses, and the OpenShift Enterprise environment will relay those responses back to your users.
+The way that OpenShift Enterprise DIY runtimes interfaces your application to the outside world is by creating an HTTP proxy specified by the environment variables *OPENSHIFT_INTERNAL_IP* and *OPENSHIFT_INTERNAL_PORT*.  All your application has to do is bind and listen on that address and port. HTTP requests will come into the OpenShift Enterprise environment, which will proxy those requests to your application. Your application will reply with HTTP responses, and the OpenShift Enterprise environment will relay those responses back to your users.
 
 Your application will be executed by the .openshift/action_hooks/start script, and will be stopped by the .openshift/action_hooks/stop script.
 
-**Note:** DIY applications are unsupported but is a great way for developers to try out unsupported languages, frameworks, or middleware that doesn’t ship as an OpenShift Enterprise cartridge.
+**Note:** DIY applications are unsupported but is a great way for developers to try out unsupported languages, frameworks, or middleware that doesn’t ship as an official OpenShift Enterprise cartridge.
 
-##**Create a DIY application type**
+##**Creating a DIY application type**
 
 To create an application gear that will use the DIY application type, use the *rhc app create* command:
 
 	$ rhc app create -a myjavademo -t diy
 	$ cd diy
 	
-##**Deploy application code**
+##**Deploying application code**
 
-Instead of spending time in this lab with writing a server runtime, we are going to use an existing that is available on the OpenShift github page.  This application code consists of a single MyHttpServer main class.  Since this source code lives on the github OpenShift project page, we need to add the remote github repository and then pull the remote source code while at the same time overwriting the existing source code we have in our DIY application directory.
+Instead of spending time in this lab with writing a server runtime, we are going to use an existing one that is available on the OpenShift github page.  This application code is written in Java and consists of a single MyHttpServer main class.  Since this source code lives on the github OpenShift project page, we need to add the remote github repository and then pull the remote source code while at the same time overwriting the existing source code we have in our DIY application directory.
 
 	$ git remote add upstream git@github.com:openshift/openshift-diy-java-demo.git
 	$ git pull -s recursive -X theirs upstream master
 	$ git push
 	
-##**Verify DIY application is working**
+##**Verify the DIY application is working**
 
 Once the java example has been pushed to your OpenShift Enterprise gear, open up a web browser and point to the following URL:
 
 	http://myjavademo-ose.example.com/index.html
 	
-**Note:** Make sure to include the index.html file on the end of the URL.
+**Note:** Make sure to include the index.html file at the end of the URL.
 
-If the application was deployed correctly, you should see a *Hello DIY World!* message.  The little http java server will serve any files found in your application's html directory, so you can add files or make changes to them, push the contents and see those reflected in your browser.
+If the application was deployed correctly, you should see a *Hello DIY World!* message.  This little http java server will serve any files found in your application's html directory, so you can add files or make changes to them, push the contents and see those reflected in your browser.
 
 ##**Under the covers**
 
-The DIY cartridge provides a number of hooks that are called out during the lifecycle actions of the application. The hooks available to you for customization are found in the .openshift/action_hooks directory of your application repository. 
+The DIY cartridge provides a number of hooks that are called during the lifecycle actions of the application. The hooks available to you for customization are found in the .openshift/action_hooks directory of your application repository. 
 
-For this application, all that has been customized are the start/stop scripts. They simply launch the MyHttpServer class using java, and perform a wget call to have the MyHttpServer stop itself:
+For this application, all that has been customized are the start and stop scripts. They simply launch the MyHttpServer class using Java, and perform a *wget* call to have the MyHttpServer stop itself:
 
 	cat .openshift/action_hooks/start 
 	#!/bin/bash
@@ -3246,11 +3244,11 @@ For this application, all that has been customized are the start/stop scripts. T
 	# The logic to stop your application should be put in this script.
 	wget http://${OPENSHIFT_INTERNAL_IP}:${OPENSHIFT_INTERNAL_PORT}?action=stop
 	
-See the src/test/MyHttpServer.java source to understand how the java application is making use of the OpenShift environment variables to interact with the server environment.
+See the *src/test/MyHttpServer.java* source to understand how the Java application is making use of the OpenShift Enterprise environment variables to interact with the server environment.
 
 **Lab 27 Complete!**
 <!--BREAK-->
-#**Lab 28:  Java EE applications using JBoss EAP (Estimated time: 30 minutes)**
+#**Lab 28:  Developing Java EE applications using JBoss EAP (Estimated time: 30 minutes)**
 
 **Server used:**
 
@@ -3262,13 +3260,13 @@ See the src/test/MyHttpServer.java source to understand how the java application
 * git
 * curl
 
-OpenShift Enterprise provides the JBoss EAP runtime to facilitate the deployment of Java EE 6 applications  
+OpenShift Enterprise provides the JBoss EAP runtime to facilitate the development and deployment of Java EE 6 applications.
 
-JBoss Enterprise Application Platform 6 (JBoss EAP 6) is a fully compliant Java EE 6 platform which includes which includes a subscription model with long-term support, platform certification, service packs and SLA(s).  In this lab we will build a simple todo application using Java EE 6 deployed on the JBoss EAP platform. The application will have a single entity called Todo and will persist todos to PostgreSQL using JPA. The application will also use EJB 3.1 Stateless session beans, Context and Dependency Inject(or CDI),and JAX RS for exposing RESTful web services.
+JBoss Enterprise Application Platform 6 (JBoss EAP 6) is a fully compliant Java EE 6 platform which includes a subscription model with long-term support, platform certification, service packs and SLA(s).  In this lab we will build a simple todo application using Java EE 6 deployed on the JBoss EAP platform. The application will have a single entity called Todo and will persist todos to PostgreSQL using JPA. The application will also use EJB 3.1 Stateless session beans, Context and Dependency Injection (or CDI), and JAX RS for exposing RESTful web services.
 
-##**Create JBoss EAP application**
+##**Create a JBoss EAP application**
 
-**Note:** Before starting this lab, it is suggested that you delete any existing applications that you have deployed to your OpenShift Enterprise installation.  The OpenStack virtual machines that have been provided only contain 2gb of memory.
+**Note:** Before starting this lab, it is suggested that you delete any existing applications that you have deployed to your OpenShift Enterprise installation.  The OpenStack virtual machines that have been provided for this training class only contain 2gb of memory.
 
 	$ rhc app create -a todo -t jbosseap
 	
@@ -3280,9 +3278,9 @@ Verify that the application has been deployed and the template is displaying cor
 
 ##**Additional marker files for JBoss EAP**
 
-If you recall from a previous lab, we discussed the way that OpenShift Enterprise allows the developer to control and manage some of the runtime features using marker files.  For Java based deployments, there are additional marker files that a developer needs to be aware of.
+If you recall from a previous lab, we discussed the way that OpenShift Enterprise allows the developer to control and manage some of the runtime features using marker files.  For Java based deployments, there are additional marker files that a developer needs to be aware of:
 
- * enable_jpda - Will enable the JPDA socket based transport on the java virtual machine running the JBoss EAP application server. This enables you to remotely debug code running inside the JBoss application server.
+ * enable_jpda - Will enable the JPDA socket based transport on the JVM running the JBoss EAP application server. This enables you to remotely debug code running inside of the JBoss application server.
 
    * skip\_maven_build - Maven build step will be skipped
    * force\_clean_build - Will start the build process by removing all non essential Maven dependencies.  Any current dependencies specified in your pom.xml file will then be re-downloaded.
@@ -3291,13 +3289,13 @@ If you recall from a previous lab, we discussed the way that OpenShift Enterpris
 
 ##**Deployment directory**
 
-If you list the contents of the application that was cloned to your local machine, you will notice a deployments directory.  This directory is a location that a developer can place binary archive files, .ear files for example, for deployment.  If you want to deploy a .war file rather than pushing source code, copy the .war file to deployments directory, add the .war file to your git repository, commit the change, and then push the content to your OpenShift Enterprise server.
+If you list the contents of the application repository that was cloned to your local machine, you will notice a deployments directory.  This directory is a location where a developer can place binary archive files, .ear files for example, for deployment.  If you want to deploy a .war file rather than pushing source code, copy the .war file to deployments directory, add the .war file to your git repository, commit the change, and then push the content to your OpenShift Enterprise server.
 
 ##**Maven**
 
-OpenShift Enterprise uses the Maven build system for all Java projects.  Once you add new source code following the Maven directory structure, OpenShift Enterprise will recognize the existing *pom.xml* if your applications root directory and build the code remotely.  
+OpenShift Enterprise uses the Maven build system for all Java projects.  Once you add new source code following the standard Maven directory structure, OpenShift Enterprise will recognize the existing *pom.xml* in your applications root directory in order to build the code remotely.  
 
-The most important thing specified in the *pom.xml* file is a Maven profile named *openshift*. This is the profile which is invoked when you do deploy the code to OpenShift.
+The most important thing specified in the *pom.xml* file is a Maven profile named *openshift*. This is the profile which is invoked when you do deploy the code to OpenShift Enterprise.
 
 ##**Embed PostgreSQL cartridge**
 
@@ -3305,7 +3303,7 @@ The *todo* sample application that we are going to write as part of this lab wil
 
 ##**Building the *todo* application**
 
-At this point, we should have an application called *todo* created and have PostgreSQL embedded in the application to use as our datastore.  Now we can begin working on the application.
+At this point, we should have an application named *todo* created as well as having PostgreSQL embedded in the application to use as our datastore.  Now we can begin working on the application.
 
 ###**Creating Domain Model**
 
@@ -3313,9 +3311,9 @@ At this point, we should have an application called *todo* created and have Post
 
 	https://github.com/gshipley/todo-javaee6
 	
-If you want the easy way out, use the information you learned from a previous lab to add the above repository as a remote repository and then pull in the source code while overwriting the existing template.
+If you want the easy way out, use the information you have learned from a previous lab to add the above repository as a remote repository and then pull in the source code while overwriting the existing template.
 
-The first thing that we have to do is to create the domain model for the *todo application*. The application will have a single entity called Todo as shown below. The entity shown below is a simple JPA entity with JPA and bean validation annotations.  Create a source file named *Todo.java* in the *todo/src/main/java/com/todo/domain* directory with the following contents:
+The first thing that we have to do is to create the domain model for the *todo application*. The application will have a single entity named *Todo* as shown below. The entity shown below is a simple JPA entity with JPA and bean validation annotations.  Create a source file named *Todo.java* in the *todo/src/main/java/com/todo/domain* directory with the following contents:
 
 package com.todo.domain;
 
@@ -3404,7 +3402,7 @@ package com.todo.domain;
 	
 ###**Create the *persistence.xml* file**
 
-The persistence.xml file is a standard configuration file in JPA that defines your data source. It has to be included in the META-INF directory inside the JAR file that contains the entity beans. The persistence.xml file must define a persistence-unit with a unique name. Create a *META-INF* directory under src/main/resources and then create a persistence.xml file with the contents below:
+The persistence.xml file is a standard configuration file in JPA that defines your data source.  It has to be included in the *META-INF* directory inside of the JAR file that contains the entity beans. The persistence.xml file must define a persistence-unit with a unique name. Create a *META-INF* directory under src/main/resources and then create the *persistence.xml* file with the contents below:
 
 	<?xml version="1.0" encoding="UTF-8" ?>
 	<persistence xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -3427,7 +3425,7 @@ The *jta-data-source* refers to JNDI name preconfigured by OpenShift Enterprise 
 
 ###**Create the TodoService EJB bean**
 
-Next we will create a stateless EJB bean TodoService in the *com.todo.service package*.  This bean will perform basic CRUD operation using *javax.persistence.EntityManager*.  Create a file named *TodoService* in the *src/main/java/com/todo/service* directory and add the following contents:
+Next we will create a stateless EJB bean named *TodoService* in the *com.todo.service package*.  This bean will perform basic CRUD operations using *javax.persistence.EntityManager*.  Create a file named *TodoService* in the *src/main/java/com/todo/service* directory and add the following contents:
 
 	package com.todo.service;
 	
@@ -3459,13 +3457,13 @@ Next we will create a stateless EJB bean TodoService in the *com.todo.service pa
 	
 ###**Enable CDI**
 
-CDI or Context and Dependency injection is a Java EE 6 specification which enables dependency injection in a Java EE 6 project. To enable CDI in the *todo* project, create a *beans.xml* file in *src/main/webapp/WEB-INF* directory with the following contents:
+CDI or Context and Dependency Injection is a Java EE 6 specification which enables dependency injection in a Java EE 6 project. To enable CDI in the *todo* project, create a *beans.xml* file in *src/main/webapp/WEB-INF* directory with the following contents:
 
 	<?xml version="1.0"?>
 	<beans xmlns="http://java.sun.com/xml/ns/javaee"
 	 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://jboss.org/schema/cdi/beans_1_0.xsd"/>
 
-In order to use the @Inject annotation instead of the @Ejb annotation to inject an EJB, you will have to write a producer which will expose EntityManager.  Create a source file in the *src/main/java/com/todo/utils* directory named *Resources* and add the following source code:
+In order to use the *@Inject* annotation instead of the *@Ejb* annotation to inject an EJB, you will have to write a producer which will expose the *EntityManager*.  Create a source file in the *src/main/java/com/todo/utils* directory named *Resources* and add the following source code:
 
 	package com.todo.utils;
 	
@@ -3481,9 +3479,9 @@ In order to use the @Inject annotation instead of the @Ejb annotation to inject 
 	
 	}
 
-###**Creating RESTful web service**
+###**Creating a RESTful web service**
 
-Before exposing a RESTful web service for the Todo entity, we need to enable JAX-RS in our application. To enable JAX-RS, create a class which extends *javax.ws.rs.core.Application* and specify the application path using a*javax.ws.rs.ApplicationPath* annotation.  Create a source file named *JaxRsActivator* in the *src/main/java/com/todo/rest* directory and add the following source code:
+Before exposing a RESTful web service for the *Todo* entity, we need to enable JAX-RS in our application. To enable JAX-RS, create a class which extends *javax.ws.rs.core.Application* and specify the application path using a *javax.ws.rs.ApplicationPath* annotation.  Create a source file named *JaxRsActivator* in the *src/main/java/com/todo/rest* directory and add the following source code:
 
 	package com.todo.rest;
 	
@@ -3496,7 +3494,7 @@ Before exposing a RESTful web service for the Todo entity, we need to enable JAX
 	}
 
 
-Next we will create a *TodoRestService* class which will expose two methods that will create and read a Todo object. The service will consume and produce JSON.  Create a source file named *TodoRestService* in the *src/main/java/com/todo/rest* directory and add the following source code:
+Next we will create a *TodoRestService* class which will expose two methods that will create and read a *Todo* object. The service will consume and produce JSON.  Create a source file named *TodoRestService* in the *src/main/java/com/todo/rest* directory and add the following source code:
 
 	package com.todo.rest;
 	
@@ -3541,15 +3539,15 @@ Next we will create a *TodoRestService* class which will expose two methods that
 		}
 	}
 	
-##**Deploy *todo* application to OpenShift Enterprise**
+##**Deploy the *todo* application to OpenShift Enterprise**
 
-Now that we have our application created, we need to push our changes to the OpenShift Enterprise gear that we created earlier in this lab. From the application root directory, issue the following commands:
+Now that we have our application created, we need to push our changes to the OpenShift Enterprise gear that we created earlier in this lab.  From the application root directory, issue the following commands:
 
 	$ git add .
 	$ git commit -am “Adding source code”
 	$ git push
 	
-Once you run the *git push* command, the application will begin building on the OpenShift Enterprise node host.  During this training class, the OpenStack virtual machines we have created are not production grade environments.  Because of this, the build process will take some time to complete.  Sit back, be patient, and help your fellow classmates who may be having problems.
+Once you execute the *git push* command, the application will begin building on the OpenShift Enterprise node host.  During this training class, the OpenStack virtual machines we have created are not production grade environments.  Because of this, the build process will take some time to complete.  Sit back, be patient, and help your fellow classmates who may be having problems.
 
 ##**Testing the *todo* application**
 
@@ -3572,7 +3570,7 @@ You should see the following output:
 	
 	{"id":1,"todo":"Sell a lot of OpenShift Enterprise","tags":["javascript","ui"],"createdOn":1359086546955}
 	
-If you downloaded and deployed the source code from the git repository, the project contains a UI component which will allow you to test the application using your web browser.  Simply point your browser to
+If you downloaded and deployed the source code from the git repository, the project contains a JSF UI component which will allow you to test the application using your web browser.  Simply point your browser to
 
 	http://todo-ose.example.com
 	
@@ -3600,11 +3598,11 @@ SSH into the application gear and verify the todo item was added to the PostgreS
 
 Jenkins (https://wiki.jenkins-ci.org) is a full featured continuous integration (CI) server that can run builds, tests, and other scheduled tasks.  OpenShift Enterprise allows you to integrate Jenkins with your OpenShift Enterprise applications.
 
-With Jenkins, you have access to a full library of plugins (https://wiki.jenkins-ci.org/display/JENKINS/Plugins) and a vibrant, thriving community of users who have discovered a new way to do development. The basic work flow is:
+With Jenkins, you have access to a full library of plugins (https://wiki.jenkins-ci.org/display/JENKINS/Plugins) and a vibrant, thriving community of users who have discovered a new way to do development.
 
 There are many reason why you would want to leverage Jenkins as a continuous integration server.  In the context of OpenShift Enterprise, some of the benefits are:
 
-* Archived Build information
+* Archived build information
 * No application downtime during the build process
 * Failed builds do not get deployed (leaving the previous working version in place)
 * More resources to build your application as each Jenkins build spins up a new gear for short lived period of time
@@ -3626,9 +3624,9 @@ You should see the following four packages installed:
 
 If you do now have the above RPM packages installed on your node host, follow the directions in lab 17 to install the Jenkins packages.  Make sure to clear the cache on the broker host after installing the new packages.
 
-##**Create Jenkins gear**
+##**Create a Jenkins gear**
 
-In order to use Jenkins on OpenShift Enterprise, you will need to create an application gear to contain the Jenkins application.  This is done using the *rhc app create* command line tool, or you can use the web console to create the application.  The syntax for using the command line tool is as follows:
+In order to use Jenkins on OpenShift Enterprise, you will need to create an application gear to contains the Jenkins application.  This is done using the *rhc app create* command line tool, or you can use the web console to create the application.  The syntax for using the command line tool is as follows:
 
 	$ rhc app create -a jenkins -t jenkins
 	
@@ -3671,11 +3669,11 @@ You should see the following output from this command:
 	
 	Note:  You can change your password at: https://jenkins-ose.example.com/me/configure
 
-Make a note of the user username and password that was created for you by OpenShift Enteprise.
+Make a note of the user username and password that was created for you by OpenShift Enterprise.
 
 ##**Adding Jenkins support to your application**
 
-Now that we a Jenkins server setup and running, we can add support to our *todo* application that will allow all futures builds to happen on the Jenkins server.  To embed the Jenkins support cartridge in your application, use the following command:
+Now that we have a Jenkins server setup and running, we can add support to our *todo* application which will allow all futures builds to compile on the Jenkins server.  To embed the Jenkins support cartridge in your application, use the following command:
 
 	$ rhc cartridge add -a todo -c jenkins-client
 
@@ -3717,15 +3715,15 @@ Once you are authenticated to the Jenkins dashboard, click on the configure link
 
 A few interesting configuration items exist that may come in handy in the future:
 
-**Builder Configuration**: The first interesting configuration is about the builder as shown below. The configuration below states that Jenkins should create a builder with a small size using the JBoss EAP cartridge and the Jenkins master will wait for 5 minutes for the slave to come online.
+**Builder Configuration**: The first interesting configuration is concerned with the builder. The configuration below states that Jenkins should create a builder with a small size using the JBoss EAP cartridge and that the Jenkins master will wait for 5 minutes for the slave to come online.
 
 ![](http://training.runcloudrun.com/images/jenkins3.png)
 
-**Git Configuration**: The next configuration item of interest is the git SCM URL. It specifies the URL of the git repository to use, the branch to use, etc. This section is important if you want to use Jenkins to build a project which exists outside of OpenShift Enterprise.  This would be useful for developers who have an internal repo for their source code that they would prefer to build from.
+**Git Configuration**: The next configuration item of interest is the git SCM URL.  It specifies the URL of the git repository to use, the branch to use, etc. This section is important if you want to use Jenkins to build a project which exists outside of OpenShift Enterprise.  This would be useful for developers who have an internal repo for their source code that they would prefer to build from.
 
-**Build Configuration**: The last configuration which is interesting is under the *build section*. Here you can specify a shell script for building the project. For our job it does the following
+**Build Configuration**: The last configuration item which is interesting is under the *build section*. Here you can specify a shell script for building the project. For our current builder it does the following:
 
-* Specify whether project should be built using Java 6 or Java 7
+* Specify if the project should be built using Java 6 or Java 7
 * Specify XMX memory configuration for maven and build the maven project. The memory it configures is 396M.
 * Deploying the application which includes stopping the application, pushing the content back from Jenkins to the application gear(s), and finally deploying the artifacts.
 
@@ -3766,7 +3764,7 @@ The source code for the default build script is as follows:
 	      
 **Deploying code to Jenkins**
 
-Now that you have the Jenkins client embedded into your *todo* application gear, any future *git push* commands will send the code to the Jenkins server for building.  To test this out, lets edit the *src/main/webapp/todo.xhtml* source file and change the title of the page.  If you do have this file, just create a new file instead.  Look for the following code block:
+Now that you have the Jenkins client embedded into your *todo* application gear, any future *git push* commands will send the code to the Jenkins server for building.  To test this out, edit the *src/main/webapp/todo.xhtml* source file and change the title of the page.  If you do not have this file, just create a new file instead.  Look for the following code block:
 
 	<h2>Todo List Creation</h2>
 	
@@ -3798,11 +3796,11 @@ After you push your changes to the Jenkins server, you should see the following 
 	To ssh://4d1b096e414243e9833dad55d774de73@todo-ose.example.com/~/git/todo.git/
 	   eb5f9dc..8cee826  master -> master
 
-While the build happening, if you open up a new terminal window and run the following command:
+While the build is happening, open up a new terminal window and run the following command:
 
 	$ rhc domain show
 	
-You will see a new gear created by the Jenkins application.  This new gear is a temporary gear that OpenShift Enterprise creates in order to build your application code.
+You will see a new gear that was created by the Jenkins application.  This new gear is a temporary gear that OpenShift Enterprise creates in order to build your application code.
 
 	  todobldr @ http://todobldr-ose.example.com/
 	  ===========================================
@@ -3818,13 +3816,13 @@ You will see a new gear created by the Jenkins application.  This new gear is a 
 	    ==========
 	      jbosseap-6.0
 	      
-If the build fails, or if you just want to see the output of the Maven build process, you can log in to your Jenkins applications, click on the build, and then click the link to view the console output.  Log in to your Jenkins application and view the contents of the last build.
+If the build fails, or if you just want to see the output of the Maven build process, you can log in to your Jenkins application, click on the build, and then click the link to view the console output.  Log in to your Jenkins application and view the contents of the last build.
 
 ![](http://training.runcloudrun.com/images/jenkins4.png)
 
 ##**Starting a new build**
 
-One of the great things about integrating your application with the Jenkins CI environment is the ability to start a new without having to modify and push your source code.  You initiate a new build, log in to the Jenkins dashboard and select the *todo* builder.  Point your browser to:
+One of the great things about integrating your application with the Jenkins CI environment is the ability to start a new build without having to modify and push your source code.  To initiate a new build, log in to the Jenkins dashboard and select the *todo* builder.  Point your browser to:
 
 	https://jenkins-ose.example.com/
 	
@@ -3840,7 +3838,7 @@ After you click the *Build Now* link, a new build will show up under the links o
 
 ![](http://training.runcloudrun.com/images/jenkins7.png)
 
-For more information about the current build, you can click on the build to manage and view details, include the console output, for the build.
+For more information about the current build, you can click on the build to manage and view details, including the console output, for the build.
 
 
 **Lab 29 Complete!**
@@ -3855,7 +3853,7 @@ For more information about the current build, you can click on the build to mana
 
 * eclipse
 
-JBoss Tools is an umbrella project for a set of Eclipse plugins that supports JBoss and related technology; there is support for OpenShift Hibernate, JBoss AS, Drools, jBPM, JSF, (X)HTML, Seam, Maven, JBoss ESB, JBoss Portal and more...
+JBoss Tools is an umbrella project for a set of Eclipse plugins that supports JBoss and related technologies; there is support for OpenShift, Hibernate, JBoss AS, Drools, jBPM, JSF, (X)HTML, Seam, Maven, JBoss ESB, JBoss Portal and more...
 
 ##**Download and install Eclipse - Juno**
 
@@ -3869,7 +3867,7 @@ and follow the instructions to install JBoss Tools 4.0 (Juno).
 
 ##**Using JBoss Tools and OpenShift Enterprise**
 
-By default, JBoss Tools OpenShift integration will default to use the OpenShift Online service that is hosted by Red Hat.  In order for us to use JBoss Tools for our OpenShift Enterprise installation, we need to configure Eclipse with our *LIBRA_SERVER* setting.  This is a straight forward process.  To make the change, edit the *eclipse.ini* file located in the root directory of your Eclipse deployment and add *-Dlibra_server=broker.example.com* directly after the the following line:
+By default, JBoss Tools OpenShift integration will default to use the OpenShift Online service that is hosted by Red Hat.  In order for us to use JBoss Tools to communicate with our OpenShift Enterprise installation, we need to configure Eclipse with our *LIBRA_SERVER* setting.  This is a straight forward process but one that may catch people off guard.  To make the change, edit the *eclipse.ini* file located in the root directory of your Eclipse deployment and add *-Dlibra_server=broker.example.com* directly after the the following line:
 
 	-vmargs
 	
@@ -3878,9 +3876,13 @@ When finished, it should look like this:
 	-vmargs
 	-Dlibra_server=broker.example.com
 	
-**Note:** If you are using the Mac OS X operating system, the process is a little more complicated.  In order to pass arguments to Eclipse, you'll have to edit the eclipse.ini file inside the Eclipse application bundle: select the Eclipse application bundle icon while holding down the Control Key. This will present you with a popup menu. Select "Show Package Contents" in the popup menu. Locate eclipse.ini file in the Contents/MacOS sub-folder and open it with your favorite text editor to edit the command line options. 
+**Note:** If you are using the Mac OS X operating system, the process is a little more complicated.  In order to pass arguments to Eclipse, you'll have to edit the *eclipse.ini* file inside the Eclipse application bundle: 
 
-On my OS X operating system, after editing the file it looks like following:
+* Select the Eclipse application bundle icon while holding down the Control Key
+* This will present you with a popup menu. Select "Show Package Contents" in the popup menu. 
+* Locate eclipse.ini file in the Contents/MacOS sub-folder and open it with your favorite text editor to edit the command line options. 
+
+On my OS X operating system, after editing the *eclipse.ini* file it looks like following:
 
 	-startup
 	../../../plugins/org.eclipse.equinox.launcher_1.3.0.v20120522-1813.jar
@@ -3917,15 +3919,15 @@ Now that we have Eclipse Juno and JBoss Tools 4.0 installed, we can create an Op
 
 ![](http://training.runcloudrun.com/images/jbosstools1.png)
 
-Once you click on the link to create a new OpenShift Enterprise application, you will be presented with a dialog to authenticate to the OpenShift Enterprise.  Now is also a good time to validate the *Server* setting is correctly set to *broker.example.com*.  If your server does not reflect this, you have not configured your *eclipse.ini* file correctly.  If you are unable to configure your *eclipse.ini* file as specified in this lab, inform the instructor so that he/she may help out.
+Once you click on the link to create a new OpenShift Enterprise application, you will be presented with a dialog to authenticate to OpenShift Enterprise.  Now is also a good time to validate the *Server* setting is correctly set to *broker.example.com*.  If your server does not reflect this, you have not configured your *eclipse.ini* file correctly.  If you are unable to configure your *eclipse.ini* file as specified in this lab, inform the instructor so that he/she may help you.
 
 ![](http://training.runcloudrun.com/images/jbosstools2.png)
 
-After clicking *next*, the JBoss Tools plugin will authenticate you to the broker host and present another dialog box to you.  On this dialog box, you have the option of creating a new application, or to use an existing one.  Since we already have a JBoss EAP application, the *todo* application, deployed, lets select to *Use existing application* and click the *Browse* button.  After clicking the *Browse* button, a REST API call be made to the broker host to retrieve the current applications that you already have deployed.  
+After clicking *next*, the JBoss Tools plugin will authenticate you to the broker host and present another dialog box to you.  On this dialog box, you have the option of creating a new application, or to use an existing one.  Since we already have a JBoss EAP application deployed, let’s select to *Use existing application* and click the *Browse* button.  After clicking the *Browse* button, a REST API call be made to the broker host to retrieve the existing applications that you already have deployed.  
 
 ![](http://training.runcloudrun.com/images/jbosstools3.png)
 
-Highlight the *todo* application and click on the *Details...* button.  This will display all of the necessary information about the application, including any gears that may be embedded.
+Highlight the *todo* application and click on the *Details...* button.  This will display all of the necessary information about the application, including any cartridges that may be embedded.
 
 ![](http://training.runcloudrun.com/images/jbosstools4.png)
 
@@ -3983,15 +3985,15 @@ Now that you have added the driver, the dialog box will display the available dr
 
 In order to verify that your port-forwarding and database connection is setup correctly, press the *test connection* button.  If your connection is failing, make sure that you have the correct authorization credentials and that port-fowarding is started via JBoss Tools.
 
-Once you have correctly added the database connection, you should now see the remote database from the OpenShift Enterprise node host available for usage in your local IDE.
+Once you have correctly added the database connection, you should now see the remote database from the OpenShift Enterprise node host available for use in your Eclipse IDE.
 
 ![](http://training.runcloudrun.com/images/db2.png)
 
-At this point, you should be able to use any of the database tools provided for Eclipse to communicate and manage your OpenShift Enterprise PostgreSQL database.
+At this point, you should be able to use any of the database tools provided by Eclipse to communicate with and manage your OpenShift Enterprise PostgreSQL database.
 
-##**Making a code change and deploying application**
+##**Making a code change and deploying the application**
 
-In the project view, expand the source files for the *src/main/webapp* directory and edit the todo.xhtml source file.  Change the following line
+In the project view, expand the source files for the *src/main/webapp* directory and edit the *todo.xhtml* source file.  Change the following line
 
 	<h2>Todo List Creation using Jenkins</h2>
 	
@@ -3999,7 +4001,7 @@ to the include JBoss Tools
 
 	<h2>Todo List Creation using Jenkins and JBoss Tools</h2>
 	
-Once you have made the source code change, save the contents of the file and then use the *Team* functionality by right clicking on your project to commit and push the changes to your OpenShift Enterprise server.  This push will follow the same workflow used previously by initiating a build on your Jenkins server.
+Once you have made the source code change, save the contents of the file and then use the *Team* functionality by right clicking on your project.  Commit and push the changes to your OpenShift Enterprise server.  This push will follow the same workflow used previously by initiating a build on your Jenkins server.
 
 ![](http://training.runcloudrun.com/images/tools1.png)
 
@@ -4028,7 +4030,7 @@ Verify that your changes were deployed correctly by opening up a web browser and
 * rhc
 * git
 
-A key tenant when Red Hat was designing OpenShift Enterprise was the ability for developers to be able to run their source code and application as is, without having to use proprietary API(s).  To illustrate how easy it is for developers to get their existing application deployed on OpenShift Enterprise,  the team has created a github space where they provide numerous quick start projects that make deploying common open source applications to the platform a painless process.  Some of the popular open source projects the team provides a quick start for are:
+A key tenant when Red Hat was designing OpenShift Enterprise was the ability for developers to be able to run their source code and application as is, without having to use proprietary API(s).  To illustrate how easy it is for developers to get their existing application deployed on OpenShift Enterprise,  the team has created a github space where they provide numerous quick start projects that make deploying common open source applications to the platform a painless task.  Some of the popular open source projects the team provides a quick start for are:
 
 * Drupal
 * Review Board
@@ -4044,7 +4046,7 @@ Point your browser to the following URL:
 
 	http://www.github.com/openshift
 	
-Given the number of available quick starts, you may have to use the search functionality of your browser to locate the quick start you would like to install.  For this lab, choose either Wordpress or Drupal and follow the instructions provided after selecting the quick start to install the application.
+Given the number of available quick starts, you may have to use the search functionality of your browser to locate the quick start that you would like to install.  For this lab, choose either the Wordpress or Drupal quick start and follow the instructions provided to install the application.
 
 ![](http://training.runcloudrun.com/images/quickstart.png)
 
@@ -4064,7 +4066,7 @@ Given the number of available quick starts, you may have to use the search funct
 * git
 * github
 
-A common task that you will probably be asked to do is make a software developers development environment easily deployable on OpenShift Enterprise.  Development teams desire a quick and repeatable way to spin up an environment with their application code already deployed and integrated with various data stores.  In the previous lab, we saw how easy it was to install application via our quick start process.  During this lab, we will focus on the ability for you to create your own quick starts using the popular open source project Piwik.
+A common task that you will be asked to do is make a software developers development environment easily deployable on OpenShift Enterprise.  Development teams desire a quick and repeatable way to spin up an environment with their application code already deployed and integrated with various data stores.  In the previous lab, we saw how easy it was to install applications via our quick start process.  During this lab, we will focus on the ability for you to create your own quick starts using the popular open source project Piwik as an example.
 
 ##**Download the Piwik source code**
 
@@ -4081,7 +4083,7 @@ This will create a piwik directory under the ~/code/piwikstage directory.
 
 ##**Create an OpenShift Enterprise application**
 
-We need to create an OpenShift Enterprise application to hold the source code as well as embed the MySQL database.
+We need to create an OpenShift Enterprise application to hold the source code as well as embed the MySQL database:
    
      $ cd ~/code
     $ rhc app create-a piwik -t php
@@ -4091,7 +4093,7 @@ OpenShift Enterprise, as you know, creates a default *index* file for your appli
 
 	$ rm -rf ~/code/piwik/php/*
 	
-At this point, we need to copy over the source code that we extracted from the zip archive to our *piwik* OpenShift Enterprise applciation.
+At this point, we need to copy over the source code that we extracted from the zip archive to our *piwik* OpenShift Enterprise applciation:
 
 	$ cp –av ~/code/piwikstage/piwik/* ~/code/piwik/php
 	
@@ -4108,7 +4110,7 @@ Assuming everything went as expected, you should be able to verify Piwik is runn
 	
 ![](http://training.runcloudrun.com/images/piwik.png)	    
 
-##**Create github repository**
+##**Creating a github repository**
 
 **Note**: This step assumes that you already have a github account.  If you don’t, head on over to www.github.com and sign up (It’s free).
    
@@ -4120,7 +4122,7 @@ Enter a project name and a description for your quick start.  I suggest a name t
 
 ![](http://training.runcloudrun.com/images/piwik2.png)
 
-On your newly created project space, grab the HTTP git URL and add the github repository as a remote to your existing *piwik* OpenShift Enterprise application.	    	
+On your newly created project space, grab the HTTP Git URL and add the github repository as a remote to your existing *piwik* OpenShift Enterprise application.	    	
 
 ![](http://training.runcloudrun.com/images/piwik3.png)
 
@@ -4129,44 +4131,44 @@ On your newly created project space, grab the HTTP git URL and add the github re
 	
 ##**Create deployment instructions**
 
-In order for developers to be able to use the quick start that you have created, you need to provide instructions for how to install the application.  These instructions need to be in the *README* and *README.md* files.  By default, github will display the contents of this file, using the markdown version if it exits, on the repository page.  For example, a proper README file would contain the following contents:
+In order for developers to be able to use the quick start that you have created, you need to provide instructions on how to install the application.  These instructions need to be in the *README* and *README.md* files.  By default, github will display the contents of this file, using the markdown version if it exits, on the repository page.  For example, a proper README file would contain the following contents:
 
-Piwik on OpenShift
-=========================
-Piwik is a downloadable, open source (GPL licensed) real time web analytics software program. It provides you with detailed reports on your website visitors: the search engines and keywords they used, the language they speak, your popular pages, and so much more.
-
-Piwik aims to be an open source alternative to Google Analytics, and is already used on more than 150,000 websites. 
-
-More information can be found on the official Piwik website at http://piwik.org
-
-	Running on OpenShift
-	--------------------
+	Piwik on OpenShift
+	=========================
+	Piwik is a downloadable, open source (GPL licensed) real time web analytics software program. It provides you with detailed reports on your website visitors: the search engines and keywords they used, the language they speak, your popular pages, and so much more.
 	
-	Create an account at http://openshift.redhat.com/
+	Piwik aims to be an open source alternative to Google Analytics, and is already used on more than 150,000 websites. 
 	
-	Create a PHP application
+	More information can be found on the official Piwik website at http://piwik.org
 	
-		rhc app create -a piwik -t php-5.3 -l $USERNAME
-	
-	Add mysql support to your application
-	    
-		rhc cartridge add -a piwik -c mysql -l $USERNAME
-	Make a note of the username, password, and host name as you will need to use these to complete the Piwik installation on OpenShift
-	
-	Add this upstream Piwik quickstart repo
-	
-		cd piwik/php
-		rm -rf *
-		git remote add upstream -m master git://github.com/gshipley/piwik-openshift-quickstart.git
-		git pull -s recursive -X theirs upstream master
-	
-	Then push the repo upstream to OpenShift
-	
-		git push
-	
-	That's it, you can now checkout your application at:
-	
-		http://piwik-$yourlogin.rhcloud.com
+		Running on OpenShift
+		--------------------
+		
+		Create an account at http://openshift.redhat.com/
+		
+		Create a PHP application
+		
+			rhc app create -a piwik -t php-5.3 -l $USERNAME
+		
+		Add mysql support to your application
+		    
+			rhc cartridge add -a piwik -c mysql -l $USERNAME
+		Make a note of the username, password, and host name as you will need to use these to complete the Piwik installation on OpenShift
+		
+		Add this upstream Piwik quickstart repo
+		
+			cd piwik/php
+			rm -rf *
+			git remote add upstream -m master git://github.com/gshipley/piwik-openshift-quickstart.git
+			git pull -s recursive -X theirs upstream master
+		
+		Then push the repo upstream to OpenShift
+		
+			git push
+		
+		That's it, you can now checkout your application at:
+		
+			http://piwik-$yourlogin.rhcloud.com
 
 Create the *README* and *README.md* in the *~/code/piwik* directory and add the contents provided above.  Once you have created these files, add and commit them to your repository:
 
@@ -4174,7 +4176,7 @@ Create the *README* and *README.md* in the *~/code/piwik* directory and add the 
 	$ git add .
 	$ git commit -am “Add installation instructions”
 	
-Now we need to push these changes to the github repository which is the main location of the quick start we are creating.
+Now we need to push these changes to the github repository we created:
 
 	$ git push -u github master
 	
@@ -4182,7 +4184,7 @@ Now we need to push these changes to the github repository which is the main loc
 
 Delete the *piwik* OpenShift Enterprise application and follow the instruction you created for your Piwik quick start to verify that everything works as expected.  
 
-**Note:**  If your application requires an existing populated database, the way to accomplish this is by using the .openshift/action_hooks/build script located in your application directory.  Once you have your database created locally, do a mysqldump on the table and store the .sql file in the action_hooks directory.  You can then modify an existing build file to import the schema on application deployment.  For an example, take a look at the action_hooks directory of the Wordpress quick start.
+**Note:**  If your application requires an existing populated database, the way to accomplish this is by using the .openshift/action_hooks/build script located in your application directory.  Once you have your database created locally, do a *mysqldump* on the table and store the .sql file in the action_hooks directory.  You can then modify an existing build file to import the schema on application deployment.  For an example, take a look at the action_hooks directory of the Wordpress quick start.
     
 
 #**Appendix A - Troubleshooting**
