@@ -3315,7 +3315,7 @@ If you want the easy way out, use the information you have learned from a previo
 
 The first thing that we have to do is to create the domain model for the *todo application*. The application will have a single entity named *Todo* as shown below. The entity shown below is a simple JPA entity with JPA and bean validation annotations.  Create a source file named *Todo.java* in the *todo/src/main/java/com/todo/domain* directory with the following contents:
 
-package com.todo.domain;
+	package com.todo.domain;
 
 	import java.util.Date;
 	import java.util.List;
