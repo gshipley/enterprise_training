@@ -592,7 +592,7 @@ Now that ActiveMQ has been installed, configured, and started, let’s verify th
 	# ssh -f -N -L 8161:broker.example.com:8161 root@10.x.x.x
 
 
-![](http://training.runcloudrun.com/images/activemqconsole.png)
+![](images/activemqconsole.png)
 
 **Note:**  While we changed the authentication credentials for the ActiveMQ service itself, the above configuration requires no authentication for accessing the activemq console, which can still be accessed via a Web interface with the default credentials.  For a production deployment, you would want to restrict access to localhost (127.0.0.1) and require authentication.  The authentication information is stored in the */etc/activemq/jetty.xml* configuration file as well as the */etc/activemq/jetty-realm.properties* file.
 
