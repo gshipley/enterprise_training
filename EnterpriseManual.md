@@ -592,7 +592,7 @@ Now that ActiveMQ has been installed, configured, and started, let’s verify th
 	# ssh -f -N -L 8161:broker.example.com:8161 root@10.x.x.x
 
 
-![](http://training.runcloudrun.com/images/activemqconsole.png)
+![](images/activemqconsole.png)
 
 **Note:**  While we changed the authentication credentials for the ActiveMQ service itself, the above configuration requires no authentication for accessing the activemq console, which can still be accessed via a Web interface with the default credentials.  For a production deployment, you would want to restrict access to localhost (127.0.0.1) and require authentication.  The authentication information is stored in the */etc/activemq/jetty.xml* configuration file as well as the */etc/activemq/jetty-realm.properties* file.
 
@@ -1473,7 +1473,7 @@ We have to use the sudo command in order to allow forwarding of low range ports.
 	
 You will notice that you may, depending on your browser settings, have to accept the SSL certificate.  In Firefox, the page will look similar to this:
 
-![](http://training.runcloudrun.com/images/cert.png)
+![](images/cert.png)
 
 Once you have accepted and added the SSL certificate, you will prompted to authenticate to the OpenShift console.  Use the credentials that we created in a previous lab, which should be:
 
@@ -1482,7 +1482,7 @@ Once you have accepted and added the SSL certificate, you will prompted to authe
 
 After you have authenticated, you should be presented with the OpenShift web console as shown below:
 
-![](http://training.runcloudrun.com/images/console.png)
+![](images/console.png)
 
 If you do not see the expected content, consult the troubleshooting section at the end of this manual.
 
@@ -1518,21 +1518,21 @@ If you are using OSX, you will notice that the operating has a */etc/resolv.conf
 
 Open up the *System Preferences* tool and select the *Network* utility:
 
-![](http://training.runcloudrun.com/images/network.png)
+![](images/network.png)
 
 On the bottom left hand corner of the *Network* utility, ensure that the lock button is unlocked to enable user modifications to the DNS configuration.  Once you have unlocked the system for changes, locate the ethernet device that is providing connectivity for your machine and click the advanced button:
 
-![](http://training.runcloudrun.com/images/network2.png)
+![](images/network2.png)
 
 Select the DNS tab at the top of the window:
 
-![](http://training.runcloudrun.com/images/network3.png)
+![](images/network3.png)
 
 **Note:** Make a list of the current DNS servers that you have configured for your operating system.  When you add a new one, OSX removes the existing servers forcing you to add them back.
 
 Click the *+* button to add a new DNS server and enter the 10.4.59.x IP address of your broker host.
 
-![](http://training.runcloudrun.com/images/network4.png)
+![](images/network4.png)
 
 **Note:** Add your existing nameservers back that you made a note of above.
 
@@ -1621,7 +1621,7 @@ Given the steps in lab 16 of this training, you should be able to access the web
 	
 You will be prompted to authenticate and then be presented with an application creation screen.  After the cache has been cleared, and assuming you have added the new cartridges correctly, you should see a screen similar to the following:
 
-![](http://training.runcloudrun.com/images/console-jboss.png)
+![](images/console-jboss.png)
 
 If you do not see the new cartridges available on the web console, check that the new cartridges are available by viewing the contents of the */usr/libexec/openshift/cartridges* directory:
 
@@ -1632,7 +1632,7 @@ If you do not see the new cartridges available on the web console, check that th
 
 Using the knowledge that you have gained during in this lab, perform the necessary commands to install both the PostgreSQL and DIY cartridges on your node host.  Verify the success of the installation by ensuring that the DIY application type is available on the web console:
 
-![](http://training.runcloudrun.com/images/console-diy.png)
+![](images/console-diy.png)
 
 
 **Lab 17 Complete!**
@@ -2125,7 +2125,7 @@ If you completed all of the steps in lab 16 correctly, you should be able to ver
 	
 You should see the default template that OpenShift Enterprise uses for a new application.
 
-![](http://training.runcloudrun.com/images/firstphp.png)
+![](images/firstphp.png)
 
 ##**What just happened?**
 
@@ -2329,7 +2329,7 @@ If you completed all of the steps in lab 16 correctly, you should be able to ver
 	
 You should see the updated code for the application.
 
-![](http://training.runcloudrun.com/images/firstphpOSE.png)
+![](images/firstphpOSE.png)
 
 ##**Adding a new PHP file**
 
@@ -2354,7 +2354,7 @@ To verify that we have created and deployed the new PHP source file correctly, o
 	
 You should see the updated code for the application.
 
-![](http://training.runcloudrun.com/images/firstphpTime.png)
+![](images/firstphpTime.png)
 	
 **Lab 22 Complete!**
 <!--BREAK-->
@@ -2476,7 +2476,7 @@ OpenShift allows remote access to the application gear by using the Secure Shell
 
 The SSH keys were generated and uploaded to OpenShift Enterprise by rhc setup command we executed in a previous lab. You can verify that SSH keys are uploaded by logging into the OpenShift Enterprise web console and clicking on the "My Account" tab as shown below.
 
-![](http://training.runcloudrun.com/images/sshkeys.png)
+![](images/sshkeys.png)
 
 **Note:** If you don't see an entry under "Public Keys" then you can either upload the SSH keys by clicking on "Add a new key" or run the *rhc setup* command again. This will create a SSH key pair in <User.Home>/.ssh folder and upload the public key to the OpenShift Enterprise server.
 
@@ -2977,19 +2977,19 @@ Open your favorite web browser and go to the following URL:
 	
 Once you enter the above URL, you will be asked to authenticate using basic auth.  For this training class, you can use the demo account that you created in a previous lab.  
 
-![](http://training.runcloudrun.com/images/consoleAuth.png)
+![](images/consoleAuth.png)
 
 After entering in valid credentials, you will see the OpenShift Enterprise web console dashboard:
 
-![](http://training.runcloudrun.com/images/consoleDashboard.png)
+![](images/consoleDashboard.png)
 
 ##**Creating a new application**
 
 In order to create a new application using the web console, click on the *ADD APPLICATION* button.  You will then be presented with a list of available runtimes that you can choose from.  To follow along with our PHP examples above, let’s create a new PHP application and name it *phptwo*.
 
-![](http://training.runcloudrun.com/images/php2.png)
+![](images/php2.png)
 
-![](http://training.runcloudrun.com/images/php2.1.png)
+![](images/php2.1.png)
 
 Once you have created the application, you will see a confirmation screen with some important information:
 
@@ -2998,7 +2998,7 @@ Once you have created the application, you will see a confirmation screen with s
 * Instructions for making code changes
 * Link to add a cartridge
 
-![](http://training.runcloudrun.com/images/php2.2.png)
+![](images/php2.2.png)
 
 
 ##**Clone your application repository**
@@ -3011,19 +3011,19 @@ Once you have made a code change, view your application in a web browser to ensu
 
 Click on the *My Applications* tab at the top of the screen and then select the *Phptwo* application by clicking on it.
 
-![](http://training.runcloudrun.com/images/php2.3.png)
+![](images/php2.3.png)
 
 After clicking on the *Phptwo* application link, you will be presented with the management dashboard for that application.  On this page, you can view the GIT repository URL, add a cartridge, or delete the application.  We want to add the MySQL database to our application.  To do this, click on the *ADD CARTRIDGE* button.
 
-![](http://training.runcloudrun.com/images/php2.4.png)
+![](images/php2.4.png)
 
 On the next screen, select the MySQL 5.1 cartridge.
 
-![](http://training.runcloudrun.com/images/php2.5.png)
+![](images/php2.5.png)
 
 Once the MySQL database cartridge has been added to your application, the web console will display a confirmation screen which contains the connection information for your database.
 
-![](http://training.runcloudrun.com/images/php2.6.png)
+![](images/php2.6.png)
 
 If you recall from a previous lab, the connection information is always available via environment variables on your OpenShift Enterprise gear.
 
@@ -3112,13 +3112,13 @@ After executing the above command, you should see output that specifies that you
 	
 Log in to the web console with your browser and click on the *scaledapp* application.  You will notice while looking at the gear details that it lists the number of gears that your application is currently using.
 
-![](http://training.runcloudrun.com/images/scaledApp.png)
+![](images/scaledApp.png)
 
 ##**Setting the scaling strategy**
 
 OpenShift Enterprise allows users the ability to set the minimum and maximum numbers of gears that an application can use to handle increased HTTP traffic.  This scaling strategy is exposed via the web console.  While on the application details screen, click the *Scaled up with HAProxy x2* button to change the default scaling rules.
 
-![](http://training.runcloudrun.com/images/scaledApp2.png)
+![](images/scaledApp2.png)
 
 ##**Manual scaling**
 
@@ -3172,7 +3172,7 @@ After executing this command, you should see the application is now using three 
 	    Scaled x3 (minimum: 2, maximum: available gears) with haproxy-1.4 on small gears
 	    
 	  
-![](http://training.runcloudrun.com/images/scaledApp3.png)
+![](images/scaledApp3.png)
 
 Just as we scaled up with the *add-gear* command, we can manually scale down with the *remove-gear* command.  Remove the third gear from your application with the following command making sure to substitute the correct application UUID:
 
@@ -3205,7 +3205,7 @@ OpenShift Enterprise provides a dashboard that will give users relevant informat
 
 	http://scaledapp-ose.example.com/haproxy-status/
 	
-![](http://training.runcloudrun.com/images/scaledApp4.png)
+![](images/scaledApp4.png)
 
 
 **Lab 26 Complete!**
@@ -3739,17 +3739,17 @@ Open up a web browser and point to the following URL:
 	
 Authenticate to the Jenkins environment by providing the username and password that was displayed after adding the Jenkins application.
 
-![](http://training.runcloudrun.com/images/jenkins.png)
+![](images/jenkins.png)
 
 Once you are authenticated to the Jenkins dashboard, click on the configure link:
 
-![](http://training.runcloudrun.com/images/jenkins2.png)
+![](images/jenkins2.png)
 
 A few interesting configuration items exist that may come in handy in the future:
 
 **Builder Configuration**: The first interesting configuration is concerned with the builder. The configuration below states that Jenkins should create a builder with a small size using the JBoss EAP cartridge and that the Jenkins master will wait for 5 minutes for the slave to come online.
 
-![](http://training.runcloudrun.com/images/jenkins3.png)
+![](images/jenkins3.png)
 
 **Git Configuration**: The next configuration item of interest is the git SCM URL.  It specifies the URL of the git repository to use, the branch to use, etc. This section is important if you want to use Jenkins to build a project which exists outside of OpenShift Enterprise.  This would be useful for developers who have an internal repo for their source code that they would prefer to build from.
 
@@ -3850,7 +3850,7 @@ You will see a new gear that was created by the Jenkins application.  This new g
 	      
 If the build fails, or if you just want to see the output of the Maven build process, you can log in to your Jenkins application, click on the build, and then click the link to view the console output.  Log in to your Jenkins application and view the contents of the last build.
 
-![](http://training.runcloudrun.com/images/jenkins4.png)
+![](images/jenkins4.png)
 
 ##**Starting a new build**
 
@@ -3860,15 +3860,15 @@ One of the great things about integrating your application with the Jenkins CI e
 	
 Once you have been authenticated, click the *todo-build* link:
 
-![](http://training.runcloudrun.com/images/jenkins5.png)
+![](images/jenkins5.png)
 
 This will place you on the *todo* application builder dashboard.  Click the *Build Now* link on the left hand side of the screen to initiate a new build:
 
-![](http://training.runcloudrun.com/images/jenkins6.png)
+![](images/jenkins6.png)
 
 After you click the *Build Now* link, a new build will show up under the links on the left hand side of the screen.
 
-![](http://training.runcloudrun.com/images/jenkins7.png)
+![](images/jenkins7.png)
 
 For more information about the current build, you can click on the build to manage and view details, including the console output, for the build.
 
@@ -3949,23 +3949,23 @@ After adding the correct arguments to the *eclipse.ini* file, restart the Eclips
 
 Now that we have Eclipse Juno and JBoss Tools 4.0 installed, we can create an OpenShift Enterprise application without having the leave the comfort of our favorite IDE.  Click on the *OpenShift Applicaiton* link that is provided on the JBoss Central screen.
 
-![](http://training.runcloudrun.com/images/jbosstools1.png)
+![](images/jbosstools1.png)
 
 Once you click on the link to create a new OpenShift Enterprise application, you will be presented with a dialog to authenticate to OpenShift Enterprise.  Now is also a good time to validate the *Server* setting is correctly set to *broker.example.com*.  If your server does not reflect this, you have not configured your *eclipse.ini* file correctly.  If you are unable to configure your *eclipse.ini* file as specified in this lab, inform the instructor so that he/she may help you.
 
-![](http://training.runcloudrun.com/images/jbosstools2.png)
+![](images/jbosstools2.png)
 
 After clicking *next*, the JBoss Tools plugin will authenticate you to the broker host and present another dialog box to you.  On this dialog box, you have the option of creating a new application, or to use an existing one.  Since we already have a JBoss EAP application deployed, let’s select to *Use existing application* and click the *Browse* button.  After clicking the *Browse* button, a REST API call be made to the broker host to retrieve the existing applications that you already have deployed.  
 
-![](http://training.runcloudrun.com/images/jbosstools3.png)
+![](images/jbosstools3.png)
 
 Highlight the *todo* application and click on the *Details...* button.  This will display all of the necessary information about the application, including any cartridges that may be embedded.
 
-![](http://training.runcloudrun.com/images/jbosstools4.png)
+![](images/jbosstools4.png)
 
 After clicking *Next*, Eclipse will ask you to create a new project or to use an existing one.  Let’s create a new one and set the correct location where we want to store the project files.
 
-![](http://training.runcloudrun.com/images/jbosstools5.png)
+![](images/jbosstools5.png)
 
 Once you click the *Finish* button, the existing application will be cloned to your local project.
 
@@ -3974,13 +3974,13 @@ Once you click the *Finish* button, the existing application will be cloned to y
 
 JBoss Tools provide many features to allow a developer to manage their application from directly inside of the Eclipse IDE.  This includes features such as viewing log files, publishing the application, and port-forwarding.  Click on the servers tab at the bottom on the Eclipse IDE to see your OpenShift Enterprise server.
 
-![](http://training.runcloudrun.com/images/jbosstools6.png)
+![](images/jbosstools6.png)
 
 ###**Tailing log files**
 
 After clicking on the *servers* tab, right click on your OpenShift Enterprise server and then select *OpenShift* and finally select *tail files*.
 
-![](http://training.runcloudrun.com/images/jbosstools7.png)
+![](images/jbosstools7.png)
 
 You will now be able to view the log files in the console tab that has been opened for you inside of Eclipse.
 
@@ -3992,7 +3992,7 @@ After clicking on the *servers* tab, right click on your OpenShift Enterprise se
 
 After clicking on the *servers* tab, right click on your OpenShift Enterprise server and then select *OpenShift* and finally select *Port forwarding*.  This will open up a new dialog that displays which services and what IP address will be used for the forwarded services.
 
-![](http://training.runcloudrun.com/images/jbosstools8.png)
+![](images/jbosstools8.png)
 
 For the next section of this lab, ensure that you click on *Start Forwarding* so that we will be able to connect to PostgreSQL from our local machine.
 
@@ -4004,7 +4004,7 @@ Download the latest PostgreSQL driver from the following location
 	
 and save it to your local computer.  Once you have the file downloaded, click on the *Data Source Explorer* tab, right click on *Database Connection* and select *New*.  This will open the following dialog where you will want to select PostgreSQL:
 
-![](http://training.runcloudrun.com/images/db1.png)
+![](images/db1.png)
 
 Initially, the *Drivers* pull down box will be empty.  In order to add our PostgreSQL driver, click the plug sign next to the drop down, highlight *PostgreSQL JDBC Driver* and then click on *JAR List*.  Click on *Add JAR/Zip* and browse to the location of the JDBC4 driver that you downloaded.
 
@@ -4019,7 +4019,7 @@ In order to verify that your port-forwarding and database connection is setup co
 
 Once you have correctly added the database connection, you should now see the remote database from the OpenShift Enterprise node host available for use in your Eclipse IDE.
 
-![](http://training.runcloudrun.com/images/db2.png)
+![](images/db2.png)
 
 At this point, you should be able to use any of the database tools provided by Eclipse to communicate with and manage your OpenShift Enterprise PostgreSQL database.
 
@@ -4035,17 +4035,17 @@ to the include JBoss Tools
 	
 Once you have made the source code change, save the contents of the file and then use the *Team* functionality by right clicking on your project.  Commit and push the changes to your OpenShift Enterprise server.  This push will follow the same workflow used previously by initiating a build on your Jenkins server.
 
-![](http://training.runcloudrun.com/images/tools1.png)
+![](images/tools1.png)
 
 After you push your changes, open up your Jenkins dashboard and open the *Console Output* screen to see the build progress.  Once your build has completed, Eclipse will display a dialog box with a summary of the deployment:
 
-![](http://training.runcloudrun.com/images/tools2.png)
+![](images/tools2.png)
 
 Verify that your changes were deployed correctly by opening up a web browser and going to the following URL:
 
 	http://todo-ose.example.com/	
 	
-![](http://training.runcloudrun.com/images/tools3.png)
+![](images/tools3.png)
 
 **Lab 30 Complete!**
 <!--BREAK-->
@@ -4080,7 +4080,7 @@ Point your browser to the following URL:
 	
 Given the number of available quick starts, you may have to use the search functionality of your browser to locate the quick start that you would like to install.  For this lab, choose either the Wordpress or Drupal quick start and follow the instructions provided to install the application.
 
-![](http://training.runcloudrun.com/images/quickstart.png)
+![](images/quickstart.png)
 
 **Lab 31 Complete!**
 <!--BREAK-->
@@ -4140,7 +4140,7 @@ Assuming everything went as expected, you should be able to verify Piwik is runn
 
 	http://piwik-ose.example.com
 	
-![](http://training.runcloudrun.com/images/piwik.png)	    
+![](images/piwik.png)	    
 
 ##**Creating a github repository**
 
@@ -4152,11 +4152,11 @@ Log in to the github website and create a new repository for our quick start.  T
 		
 Enter a project name and a description for your quick start.  I suggest a name that identifies the project as a OpenShift Enterprise quick start.  For example, a good name would be *Piwik-openshift-quickstart*.
 
-![](http://training.runcloudrun.com/images/piwik2.png)
+![](images/piwik2.png)
 
 On your newly created project space, grab the HTTP Git URL and add the github repository as a remote to your existing *piwik* OpenShift Enterprise application.	    	
 
-![](http://training.runcloudrun.com/images/piwik3.png)
+![](images/piwik3.png)
 
 	$ cd ~/code/piwik
 	$ git remote add github ${github http URL from github}
