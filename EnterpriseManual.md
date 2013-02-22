@@ -810,7 +810,7 @@ Instead of copying the example DNS configuration file, we are going to create a 
 	# cd /var/named
 	# KEY="$(grep Key: K${domain}*.private | cut -d ' ' -f 2)"
 	
-To verify that your variables were recreated correctly, echo the contents of your keyfile and verify your $KEY variable is set correctly:
+To verify that your variables were recreated correctly, cat the contents of your keyfile and verify your $KEY variable is set correctly:
 
 	# cat $keyfile
 	# echo $KEY
@@ -1064,9 +1064,9 @@ Now that our key has been copied from our broker application host to our node ho
 
 ##**Configuring DNS resolution on the node**
 
-We need to configure the node host to use the BIND server that we have installed and configured on the broker application host.  This is a fairly straight forward process by adding the IP address of the broker application host to our */etc/resolv.conf* on the node host.  Edit this file and the following line making sure to use the correct IP address of your broker application server.
+We need to configure the node host to use the BIND server that we have installed and configured on the broker application host.  This is a fairly straight forward process by adding the IP address of the broker application host to our */etc/resolv.conf* on the node host.  Edit this file and add the following line above the other namserver lines making sure to use the correct IP address of your broker application server.
 
-**Note: Execute the following on the node host.**
+**Note: Add the following line in the /etc/resolv.conf file above the other nameserver lines on the node host.**
 
 	nameserver 10.x.x.x
 
@@ -1165,6 +1165,7 @@ At this point, MCollective on the node host should be able to communicate with t
 	
 If MCollective was installed and configured correctly, you should see node.example.com in the output from the previous command.
 
+If the command doesn't work you may need to restart ActiveMQ on the broker and MCollective on the node and then try the mco ping command again.
 
 **Lab 11 Complete!**
 <!--BREAK-->
@@ -2000,8 +2001,10 @@ With Ruby and Git correctly installed, you can now use the RubyGems package mana
 By default, the RHC command line tool will default to use the publicly hosted OpenShift environment.  Since we are using our own enterprise environment, we need to tell *rhc* to use our broker.example.com server instead of openshift.com.  In order to accomplish this, the first thing we need to do is set our *LIBRA_SERVER* variable to point to our broker host and then run the *rhc setup* command:
 
 	$ LIBRA_SERVER=broker.example.com rhc setup
-	
+
 Once you enter in that command, you will be prompted for the username that you would like to authenticate with.  For this training class, use the *demo* user account that we created in a previous lab.  After providing the username that you would like to connect with, you will be prompted for the password of the user account.
+
+>If you have installed rhc tools before and have run this setup command for another OpenShift instance you might need to backup and delete your *~/.openshift/express.conf* file. You'll notice this if you are not prompted for your username when you run the setup command.
 
 The next step in the setup process is to create and upload our SSH key to the broker server.  This is required for pushing your source code, via git, up to the OpenShift Enterprise server.
 
@@ -2409,7 +2412,7 @@ To start the application back up, execute the following command:
 
 Verify that your application has been started with the following *curl* command:
 
-	$ curl http://firstphp-ose.example.com/health
+	$ curl http://firstphp-ose.example.com/health_check.php
 	
 	1
 	
@@ -2657,7 +2660,6 @@ There is another variant of this command which does not require the user to conf
 Not only you can take a backup of an application but you can also restore a previously saved snapshot.  This form of the *rhc* command restores the git repository, as well as the application data directories and the log files found in the specified archive. When the restoration is complete, OpenShift Enterprise runs the deployment script on the newly restored repository.  To restore an application snapshot, run the following command:
 
 	$ rhc snapshot restore -a firstphp -f firstphp.tar.gz
-
 
 **NOTE**: This command will stop your application for the duration of the restore process.
 
