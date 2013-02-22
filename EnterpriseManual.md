@@ -589,6 +589,9 @@ Now that ActiveMQ has been installed, configured, and started, let’s verify th
 **Note:** Given the current configuration, ActiveMQ is only available on the localhost.  If you want to be able to connect to it via HTTP remotely, you will need to either enable a SSH port forwarding tunnel or you will need to add a rule to your firewall configuration:
 	
 	# lokkit --port=8161:tcp
+
+OR
+
 	# ssh -f -N -L 8161:broker.example.com:8161 root@10.x.x.x
 
 
