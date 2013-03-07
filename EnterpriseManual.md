@@ -189,16 +189,20 @@ DNSSEC, which stands for DNS Security Extensions, is a method by which DNS serve
 Create a DNSSEC key pair and store the private key in a variable named $key by using the following commands:
 
 	# cd /var/named
+	# rm K${domain}*
 	# dnssec-keygen -a HMAC-MD5 -b 512 -n USER -r /dev/urandom ${domain}
 	# KEY="$(grep Key: K${domain}*.private | cut -d ' ' -f 2)"
 	# cd -
-	# rndc-confgen -a -r /dev/urandom
 
 Verify that the key was created properly by viewing the contents of the key variable:
 
 	# echo $KEY
 	
-Configure the ownership, permissions, and SELinux context for the key we created:
+We must also create an rndc key, which will be used by the initscript to query the status of BIND when you run *service named status*:
+	
+	# rndc-confgen -a -r /dev/urandom
+
+Configure the ownership, permissions, and SELinux contexts for the keys we created:
 
 	# restorecon -v /etc/rndc.* /etc/named.*
 	# chown -v root:named /etc/rndc.key
@@ -245,7 +249,7 @@ Issue the following command to create the *${domain}.db* file (before running  t
 	
 Once you have entered the above echo command, cat the contents of the file to ensure that the command was successful:
 
-	# cat
+	# cat /var/named/dynamic/${domain}.db
 	
 You should see the following output:
 
@@ -272,7 +276,7 @@ Now we need to install the DNSSEC key for our domain:
 	};
 	EOF
 	
-Set the correct permissions and context:
+Set the correct permissions and contexts:
 
 	# chown -Rv named:named /var/named
 	# restorecon -rv /var/named
@@ -404,11 +408,13 @@ In order to configure your broker host to use a DNS server that we installed in 
 	
 If you are unsure of which network device that your system is using, you can issue the *ifconfig* command to list all available network devices for your machine.  Note, the *lo* device is the loopback device and is not the one you are looking for.
 
-Once you have the correct file opened, add the following information making sure to substitute the correct IP Address.
+Once you have the correct file opened, add the following information making sure to substitute the IP address of the broker host:
 
-	prepend domain-name-servers **YourBrokerIPAddress**
+	prepend domain-name-servers 10.4.59.x;
 	supersede host-name "broker";
 	supersede domain-name "example.com";
+	
+Ensure that you do not have any typos.  Command errors include forgetting a semicolon, putting in the node's IP address instead of the broker's, or typing "server" instead of "servers."
 	
 ##**Set the host name for your server**
 
@@ -586,9 +592,14 @@ Now that ActiveMQ has been installed, configured, and started, let’s verify th
 
 	http://brokerIPAddress:8161
 	
-**Note:** Given the current configuration, ActiveMQ is only available on the localhost.  If you want to be able to connect to it via HTTP remotely, you will need to either enable a SSH port forwarding tunnel or you will need to add a rule to your firewall configuration:
+**Note:** Given the current configuration, the ActiveMQ console is only available on the localhost.  If you want to be able to connect to it via HTTP remotely, you will need to either enable a SSH port forwarding tunnel or you will need to add a rule to your firewall configuration.  Use one of the following two commands (you do not need to run both!).
+
+The following command adds a rule to your firewall to allow connections to the ActiveMQ console.  **Note: Execute the following on the broker host.**
 	
 	# lokkit --port=8161:tcp
+
+Alternatively, the following command creates a SSH tunnel, so that if you connect to port 8161 on your local host, the connection will be forwarded to port 8161 on the remote host, where the the ActiveMQ console is listening.  **Note: Execute the following on your local machine.**
+
 	# ssh -f -N -L 8161:broker.example.com:8161 root@10.x.x.x
 
 
@@ -674,14 +685,6 @@ Here, we have configured the MCollective client to connect to ActiveMQ running o
 	# yum install openshift-origin-broker openshift-origin-broker-util rubygem-openshift-origin-auth-remote-user rubygem-openshift-origin-msg-broker-mcollective rubygem-openshift-origin-dns-bind
 	
 **Note:** Depending on your connection and speed of your broker host, this installation make take several minutes.
-
-##**Modifying the broker proxy server name**
-
-The default value of the ServerName property is localhost, and you need to change this to accurately reflect your broker's host name. Run the following command to update your broker's host name using sed: 
-
-	# sed -i -e "s/ServerName .*$/ServerName `hostname`/" /etc/httpd/conf.d/000000_openshift_origin_broker_proxy.conf
-	
-**Note:** You can also manually update the */etc/httpd/conf.d/000000_openshift_origin_broker_proxy.conf* and modify the ServerName attribute to reflect the correct hostname.
   
 ##**Configuring the firewall and setting service to start on boot**
 
@@ -705,7 +708,7 @@ We now need to generate access keys that will allow some of the services, Jenkin
 	# openssl genrsa -out /etc/openshift/server_priv.pem 2048
 	# openssl rsa -in /etc/openshift/server_priv.pem -pubout > /etc/openshift/server_pub.pem
 	
-We also need to generate a ssh key pair that will allow communication between the broker host and any nodes that you have configured.  Remember, the broker host is the director of communications and the node hosts actually contain all of the application gears that your users create.  In order to generate this SSH keypair, perform the following commands:
+We also need to generate a ssh key pair that will allow communication between the broker host and any nodes that you have configured.  For example, the broker host will use this key in order to transfer data between nodes when migrating a gear from one node host to another.  Remember, the broker host is the director of communications and the node hosts actually contain all of the application gears that your users create.  In order to generate this SSH keypair, perform the following commands:
 
 	# ssh-keygen -t rsa -b 2048 -f ~/.ssh/rsync_id_rsa
 	
@@ -740,6 +743,8 @@ We also need to set several files and directories with the proper SELinux contex
 	# fixfiles -R mod_passenger restore
 	# restorecon -rv /var/run
 	# restorecon -rv /usr/share/rubygems/gems/passenger-*
+
+The *fixfiles* command updates SELinux's database that associates pathnames with SELinux contexts.  The *restorecon* command uses this database to update the SELinux contexts of the specified files on the file system itself so that those contexts will be in effect when the kernel enforces policy.  See the manual pages of the *fixfiles* and *restorecon* commands for further details.
 
 ##**Understanding and changing the broker configuration**
 
@@ -800,7 +805,7 @@ The broker application will check the plugins.d directory for files ending in .c
 
 ##**Configuring the DNS plugin**
 
-Instead of copying the example DNS configuration file, we are going to create a new one by issuing an echo command.  We are doing this to take advantage of the $domain and $keyfile environment variables that we created in a previous lab.  If you no longer have these variables set, you can recreate them with the following commands:
+Instead of copying the example DNS configuration file, we are going to create a new one by issuing a cat command.  We are doing this to take advantage of the $domain and $keyfile environment variables that we created in a previous lab.  If you no longer have these variables set, you can recreate them with the following commands:
 
 	# domain=example.com
 	# keyfile=/var/named/${domain}.key
@@ -1274,7 +1279,8 @@ The pam_namespace PAM module sets up a private namespace for a session with poly
 
 You also need to enter the following script on the command line:
 
-**This script is available for download from the lab support website.**
+**This script is available for download from the lab support website and
+under /root/training/labs/lab13/ on your node host.**
 
 	for f in "runuser" "runuser-l" "sshd" "su" "system-auth-ac"; \
 	do t="/etc/pam.d/$f"; \
@@ -1396,6 +1402,8 @@ We need to modify the */etc/sysctl.conf* configuration file to increase the numb
 Once the changes have been made, we need to reload the configuration file.
 
 	# sysctl -p /etc/sysctl.conf
+
+You may see error messages about unknown keys.  Check that these error messages did not result from typos in the settings you have added just now.  If they result from settings that were already present in */etc/sysctl.conf*, you can ignore them.
 
 **Lab 14 Complete!**
 <!--BREAK-->
@@ -1604,7 +1612,7 @@ The above command will allow users to create JBoss EAP and JBoss EWS gears.  We 
 
 ##**Clearing the broker application cache**
 
-At this point, you will notice that if you try to create a JBoss based application via the web console, that the application type is not available.  This is because the broker host creates a cache of available gear types to increase performance.  After adding a new cartridge, you need to clear this cache in order for the new gear type to be available to users.
+At this point, you will notice if you try to create a JBoss based application via the web console that the application type is not available.  This is because the broker host creates a cache of available gear types to increase performance.  After adding a new cartridge, you need to clear this cache in order for the new gear type to be available to users.
 
 **Note:** Execute the following on the broker host.
 
@@ -1671,7 +1679,7 @@ When changing the */etc/openshift/broker.conf* configuration file, keep in mind 
 
 ##**Setting the number of gears a specific user can create**
 
-There are often times when you want to increase or decrease the number of gears a particular user can consume without modifying the setting for all existing users.  OpenShift Enterprise provides a command that will allow the administrator to configure settings for an individual user.  To see all of the available options that can be performed on a specific user, enter the following command:
+There are often times when you want to increase or decrease the number of gears a particular user can consume without modifying the setting for all existing users.  OpenShift Enterprise provides a command that will allow the administrator to configure settings for an individual user.  To see all of the available options that can be performed on a specific user, enter the following command on the broker host:
 
 	# oo-admin-ctl-user
 	
@@ -1928,27 +1936,27 @@ After the installation has completed, run:
 
 	$ rhc -v
 
-##**Fedora 16 and 17**
+##**Fedora**
 
-To install from yum on Fedora 16 and 17, run:
+To install on Fedora 16, 17, or 18, the most reliable solution is to use RubyGems.
 
-	$ sudo yum install rubygem-rhc
+	$ sudo yum install rubygems
 
-This installs Ruby, Git, and the other dependencies required to run the OpenShift Enterprise client tools.
+After installing RubyGems, use it to install the OpenShift Enterprise client tools:
 
-After the OpenShift Enterprise client tools have been installed, run:
+	$ sudo gem install rhc
+
+You will also need to install Git if it is not already installed:
+
+	$ sudo yum install git
+
+After the OpenShift Enterprise client tools have been installed, run the following command:
 
 	$ rhc -v
 
-##**Red Hat Enterprise Linux 6.2 and 6.3**
+##**Red Hat Enterprise Linux**
 
-The most recent version of the OpenShift Enterprise client tools are available as a RPM from the OpenShift Enterprise hosted YUM repository. We recommend this version to remain up to date, although a version of the OpenShift Enterprise client tools RPM is also available through EPEL.
-
-To add the OpenShift Enterprise YUM repository, download the repository file openshift.repo and move it to your **/etc/yum.repos.d/** directory.
-
-	$ sudo mv ~/openshift.repo /etc/yum.repos.d/
-
-In order to install the rubygems package, the *RHEL Optional* channel must be enabled. There are two ways of doing this from the command line.  If you are using the Certificate-Based RHN tooling, enter the following command:
+To install on Red Hat Enterprise Linux 6.2, 6.3, or 6.4, the most reliable solution is to use RubyGems.  In order to install the RubyGems package, the *RHEL Optional* channel must be enabled. There are two ways of doing this from the command line.  If you are using the Certificate-Based RHN tooling, enter the following command:
 
 	$ sudo yum-config-manager --enable rhel-6-server-optional-rpms   
 
@@ -1956,13 +1964,25 @@ If you are using RHN-Classic, enter the following command:
 
 	$ sudo rhn-channel --add --channel=rhel-x86rhel-x86_64-server-optional-6
 
-With the repository in place, you can now install the OpenShift Enterprise client tools by running the following command:
+With the repository in place, you can now install RubyGems:
 
-	$ sudo yum install rubygem-rhc
+	$ sudo yum install rubygems
+
+After installing RubyGems, use it to install the OpenShift Enterprise client tools:
+
+	$ sudo gem install rhc
+
+You will also need to install Git if it is not already installed:
+
+	$ sudo yum install git
+
+After the OpenShift Enterprise client tools have been installed, run the following command:
+
+	$ rhc -v
 
 ##**Ubuntu**
 
-Use the apt-get command line package manager to install Ruby and Git before you install the OpenShift Enterprise command line tools. Run:
+Use the apt-get command line package manager to install Ruby and Git before you install the OpenShift Enterprise command line tools. Run the following command:
 
 	$ sudo apt-get install ruby-full rubygems git-core
 
@@ -1973,7 +1993,7 @@ After you install both Ruby and Git, verify they can be accessed via the command
 
 If either program is not available from the command line, please add them to your PATH environment variable.
 
-With Ruby and Git correctly installed, you can now use the RubyGems package manager to install the OpenShift Enterprise client tools. From a command line, run:
+With Ruby and Git correctly installed, you can now use the RubyGems package manager to install the OpenShift Enterprise client tools. From a command line, run the following command:
 
 	$ sudo gem install rhc
 
@@ -4084,7 +4104,7 @@ Given the number of available quick starts, you may have to use the search funct
 
 **Lab 31 Complete!**
 <!--BREAK-->
-**Lab 32: Creating a quick start (Estimated time: 30 minutes)**
+#**Lab 32: Creating a quick start (Estimated time: 30 minutes)**
 
 
 **Server used:**
@@ -4223,7 +4243,7 @@ Delete the *piwik* OpenShift Enterprise application and follow the instruction y
 
 ##**Diagnostics script**
 
-Installing and configuring an OpenShift Enterprise PaaS can often fail due to simple mistakes in configuration files.  Fortunately,  the team provides an unsupported troubleshooting script that can diagnose most problems with an installation.  This script is located on the lab support website and is called *oo-diagnostics*.  For this lab, running the version provided on the support website should suit your needs but when helping customers out, I suggest you pull the script from the official github repository to ensure that you have most updated version.  The github script can is located at:
+Installing and configuring an OpenShift Enterprise PaaS can often fail due to simple mistakes in configuration files.  Fortunately,  the team provides an unsupported troubleshooting script that can diagnose most problems with an installation.  This script is located on the lab support website and is called *oo-diagnostics*.  For this lab, running the version provided on the support website should suit your needs but when helping customers out, I suggest you pull the script from the official github repository to ensure that you have most updated version.  The github script is located at:
 
 	https://raw.github.com/openshift/origin-server/master/util/oo-diagnostics
 	
@@ -4276,7 +4296,7 @@ The above commands will stop the users application and them remove the applicati
 
 ##**Diagnostics script**
 
-Installing and configuring an OpenShift Enterprise PaaS can often fail due to simple mistakes in configuration files.  Fortunately,  the team provides an unsupported troubleshooting script that can diagnose most problems with an installation.  This script is located on the lab support website and is called *oo-diagnostics*.  For this lab, running the version provided on the support website should suit your needs but when helping customers out, I suggest you pull the script from the official github repository to ensure that you have most updated version.  The github script can is located at:
+Installing and configuring an OpenShift Enterprise PaaS can often fail due to simple mistakes in configuration files.  Fortunately,  the team provides an unsupported troubleshooting script that can diagnose most problems with an installation.  This script is located on the lab support website and is called *oo-diagnostics*.  For this lab, running the version provided on the support website should suit your needs but when helping customers out, I suggest you pull the script from the official github repository to ensure that you have most updated version.  The github script is located at:
 
 	https://raw.github.com/openshift/origin-server/master/util/oo-diagnostics
 	
