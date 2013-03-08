@@ -367,12 +367,12 @@ You should see a confirmation message that the service was started correctly.  I
 
 ##**Adding entries using *nsupdate***
 
-Now that our BIND server is configured and started, we need to add a record for our broker node to BIND’s database.  To accomplish this task, we will use the nsupdate command, which opens an interactive shell where we can perform commands, **using the 10.x.x.x address provided to you**:
+Now that our BIND server is configured and started, we need to add a record for our broker node to BIND’s database.  To accomplish this task, we will use the nsupdate command, which opens an interactive shell where we can perform commands, **using the 10.4.59.x address provided to you**:
 
 	# nsupdate -k ${keyfile}
 	> server 127.0.0.1
 	> update delete broker.example.com A
-	> update add broker.example.com 180 A **your broker ip address**
+	> update add broker.example.com 180 A 10.4.59.x
 	> send
 	
 Press control-D to exit from the interactive session.
@@ -600,7 +600,7 @@ The following command adds a rule to your firewall to allow connections to the A
 
 Alternatively, the following command creates a SSH tunnel, so that if you connect to port 8161 on your local host, the connection will be forwarded to port 8161 on the remote host, where the the ActiveMQ console is listening.  **Note: Execute the following on your local machine.**
 
-	# ssh -f -N -L 8161:broker.example.com:8161 root@10.x.x.x
+	# ssh -f -N -L 8161:broker.example.com:8161 root@10.4.59.x
 
 
 ![](images/activemqconsole.png)
@@ -1027,18 +1027,15 @@ OpenShift Enterprise requires NTP to synchronize the system and hardware clocks.
 
 If you did not use example.com, replace the above command with the correct location of your keyfile.
 
-In order to configure your DNS to resolve your node host, we need to tell our BIND server about the host.  Run the following command and **replace the IP address with the correct IP address of your node**.  
+In order to configure your DNS to resolve your node host, we need to tell our BIND server about the host.  Run the following command and **replace the IP address with the correct IP address of your node**.  ***Note: Execute the following on the broker host**:
 
-***Note: Execute the following on the broker host**:
-
-
-	# oo-register-dns -h node -d example.com -n 10.10.10.11 -k ${keyfile}
+	# oo-register-dns -h node -d example.com -n 10.4.59.y -k ${keyfile}
 	
 Now that we have added node.example.com to our DNS server, the broker application host should be able to resolve the node host by referring to it by name.  Let’s test this:
 
 	# dig @127.0.0.1 node.example.com
 	
-This should resolve to 10.10.10.11, or the IP address that you specified when you ran the command.
+This should resolve to the 10.4.59.y IP address that you specified for the node host in the *oo-register-node* command.
 
 ##**Configuring SSH key authentication between broker and node**
 
@@ -1065,11 +1062,11 @@ Now that our key has been copied from our broker application host to our node ho
 
 ##**Configuring DNS resolution on the node**
 
-We need to configure the node host to use the BIND server that we have installed and configured on the broker application host.  This is a fairly straight forward process by adding the IP address of the broker application host to our */etc/resolv.conf* on the node host.  Edit this file and the following line making sure to use the correct IP address of your broker application server.
+We need to configure the node host to use the BIND server that we have installed and configured on the broker application host.  This is a fairly straight forward process by adding the IP address of the broker application host to our */etc/resolv.conf* on the node host.  Edit this file and add the following line, making sure to use the correct IP address of your broker host:
 
-**Note: Execute the following on the node host.**
+	nameserver 10.4.59.x
 
-	nameserver 10.x.x.x
+**Note: Perform this change on the node host.**
 
 ##**Configuring the DHCP client and hostname**
 
@@ -1077,9 +1074,9 @@ On the node host, we need to configure our settings to prepend the DNS server we
 
 **Note:** This step assumes that your node host is using the eth0 device for network connectivity.  If that is not the case, replace eth0 with the correct Ethernet device for your host.
 
-Edit the */etc/dhcp/dhclient-eth0.conf* file, or add it if it doesn’t exist, and add the following information ensuring that you replace the IP address with the correct IP of your broker application host.
+Edit the */etc/dhcp/dhclient-eth0.conf* file, or add it if it doesn’t exist, and add the following information ensuring that you replace the IP address with the correct IP of your broker application host:
 
-	prepend domain-name-servers 10.x.x.x;
+	prepend domain-name-servers 10.4.59.x;
 	supersede host-name "node";
 	supersede domain-name "example.com";
 	
@@ -1451,7 +1448,7 @@ If a node is restarted, we want to ensure that the gear applications are also re
 Edit the */etc/openshift/node.conf* file and **specify the correct settings for your *CLOUD_DOMAIN, PUBLIC_HOSTNAME, and BROKER_HOST* IP address**.  For example, given the information in this lab, my settings are as follows:
 
 	PUBLIC_HOSTNAME="node.example.com"       # The node host's public hostname
-	PUBLIC_IP=“10.x.x.x”                                      # The node host's public IP address
+	PUBLIC_IP="10.4.59.y"                                      # The node host's public IP address
 	BROKER_HOST="broker.example.com"              # IP or DNS name of broker host for REST API
 	
 ##**Updating the *facter* database**
@@ -1510,7 +1507,7 @@ At this point, we should have a complete OpenShift Enterprise installation worki
 
 ##**Configuring example.com resolution for Linux**
 
-If you are using Linux, the process for updating your name server is straightforward.  Simply edit the */etc/resolv.conf* configuration file and add the IP address of your broker node as the first entry.  For example, add the following at the top of the file, replacing the 10.x.x.x IP address with the correct address of your broker node.
+If you are using Linux, the process for updating your name server is straightforward.  Simply edit the */etc/resolv.conf* configuration file and add the IP address of your broker node as the first entry.  For example, add the following at the top of the file, replacing the 10.4.59.x IP address with the correct address of your broker node:
 
 	nameserver 10.4.59.x
 	
