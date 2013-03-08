@@ -692,7 +692,6 @@ The broker application requires a number of services to be running in order to f
 
 	# chkconfig httpd on
 	# chkconfig network on
-	# chkconfig ntpd on
 	# chkconfig sshd on
 	
 We also need to modify the firewall rules to ensure that the traffic for these services is accepted:
