@@ -218,7 +218,7 @@ Create a forwards.conf file with the following commands:
 
 	# echo "forwarders { 8.8.8.8; 8.8.4.4; } ;" >> /var/named/forwarders.conf
 	# restorecon -v /var/named/forwarders.conf
-	# chmod -v 755 /var/named/forwarders.conf
+	# chmod -v 644 /var/named/forwarders.conf
 	
 ##**Configuring subdomain resolution and creating an initial DNS database**
 
