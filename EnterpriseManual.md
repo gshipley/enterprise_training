@@ -1606,16 +1606,28 @@ The above command will allow users to create JBoss EAP and JBoss EWS gears.  We 
 
 **Note:** Depending on your connection and speed of your node host, this installation make take several minutes.  
 
-##**Clearing the broker application cache**
+##**Verifying that the node has the new cartridges**
 
-At this point, you will notice if you try to create a JBoss based application via the web console that the application type is not available.  This is because the broker host creates a cache of available gear types to increase performance.  After adding a new cartridge, you need to clear this cache in order for the new gear type to be available to users.
+The node maintains a database of facts about the system.  The */etc/cron.minutely/openshift-facts* cron job updates this database once every minute using the "facter" utility.  The database includes a list of cartridges.  You can verify that this list of cartridges is up to date by using MCollective to query the node.
+
+**Note:** Execute the following on the broker host.
+
+	# mco inventory node.example.com | grep cart_list
+
+You should see a list of all cartridges that are installed on the node.  Verify that your newly installed cartridges are listed.
+
+##**Clearing the broker and console caches**
+
+At this point, you will notice if you try to create a JBoss based application via the web console that the application type is not available.  This is because the broker and the console both cache the list of available cartridges in order to increase performance.  After adding a new cartridge, you need to clear these caches in order for the new cartridges to be available to users.
 
 **Note:** Execute the following on the broker host.
 
 	# cd /var/www/openshift/broker
 	# bundle exec rake tmp:clear
-	
-It may take several minutes before you see the new cartridges available on the web console as it takes a few minutes for the cache to completely clear.
+	# cd /var/www/openshift/console
+	# scl enable ruby193 'bundle exec rake tmp:clear'
+
+After executing these commands, any newly installed cartridges should be immediately visible in the console.
 
 ##**Testing new cartridges**
 
